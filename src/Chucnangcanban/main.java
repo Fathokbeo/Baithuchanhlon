@@ -1,4 +1,4 @@
 package Chucnangcanban;
 
-public class main {
+public class Account {
 }
