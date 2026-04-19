@@ -46,7 +46,7 @@ public class User extends Entity{
         this.displayName = requireText(displayName,"displayName");
         touch(timestamp);
     }
-
+//phương thức yêu cầu người dùng phải nhập ầu vào không cho để trống
     protected static String requireText(String value, String fieldName){
         if(value == null || value.isBlank()){
             throw new IllegalAccessException(fieldName + "must not be blank");

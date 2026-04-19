@@ -5,7 +5,7 @@ import java.time.LocalDateTime;
 import java.util.Objects;
 import java.util.UUID;
 
-public class Item extends Entity {
+public abstract class Item extends Entity {
     private final UUID sellerid;
     private String name;
     private String description;
