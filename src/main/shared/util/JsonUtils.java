@@ -1,3 +1,5 @@
+package main.shared.util;
+
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -18,7 +20,7 @@ public final class JsonUtils {
         return MAPPER;
     }
 
-    public static JsonNode toJsonNode(Object value) {
+    public static com.fasterxml.jackson.databind.JsonNode toJsonNode(Object value) {
         return MAPPER.valueToTree(value);
     }
 

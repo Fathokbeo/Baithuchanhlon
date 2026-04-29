@@ -49,7 +49,7 @@ public class User extends Entity{
 //phương thức yêu cầu người dùng phải nhập ầu vào không cho để trống
     protected static String requireText(String value, String fieldName){
         if(value == null || value.isBlank()){
-            throw new IllegalAccessException(fieldName + "must not be blank");
+            throw new IllegalArgumentException(fieldName + " must not be blank");
         }
         return value.trim();
     }
