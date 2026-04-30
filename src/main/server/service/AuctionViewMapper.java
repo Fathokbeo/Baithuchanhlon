@@ -20,13 +20,13 @@ public final class AuctionViewMapper {
                 auction.getId(),
                 auction.getItem().getName(),
                 auction.getItem().getType(),
-                auction.getItem().getStartingprice(),
-                auction.getCurrentprice(),
+                auction.getItem().getStartingPrice(),
+                auction.getCurrentPrice(),
                 auction.getStatus(),
                 auction.getStartTime(),
                 auction.getEndTime(),
                 sellerName,
-                auction.getLeadingBiddername()
+                auction.getLeadingBidderName()
         );
     }
 
@@ -41,7 +41,7 @@ public final class AuctionViewMapper {
                 ))
                 .toList();
         List<PricePointDto> priceHistory = new ArrayList<>();
-        priceHistory.add(new PricePointDto(auction.getStartTime(), auction.getItem().getStartingprice()));
+        priceHistory.add(new PricePointDto(auction.getStartTime(), auction.getItem().getStartingPrice()));
         auction.getBidHistory().forEach(bid -> priceHistory.add(new PricePointDto(bid.getBidTime(), bid.getAmount())));
         List<AutoBidDto> autoBids = auction.getAutoBidConfigs().stream()
                 .filter(config -> config.isActive())
@@ -54,20 +54,20 @@ public final class AuctionViewMapper {
                 .toList();
         return new AuctionDetailDto(
                 auction.getId(),
-                auction.getSellerid(),
+                auction.getSellerId(),
                 sellerName,
                 auction.getItem().getName(),
                 auction.getItem().getDescription(),
                 auction.getItem().printInfo(),
                 auction.getItem().getType(),
-                auction.getItem().getStartingprice(),
-                auction.getCurrentprice(),
+                auction.getItem().getStartingPrice(),
+                auction.getCurrentPrice(),
                 auction.getStatus(),
                 auction.getStartTime(),
                 auction.getEndTime(),
-                auction.getLeadingBiddername(),
-                auction.getWinnerBiddername(),
-                auction.getExtentionCount(),
+                auction.getLeadingBidderName(),
+                auction.getWinnerBidderName(),
+                auction.getExtensionCount(),
                 bidHistory,
                 priceHistory,
                 autoBids

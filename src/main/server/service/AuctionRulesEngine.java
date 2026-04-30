@@ -25,7 +25,7 @@ public final class AuctionRulesEngine {
         auction.refreshLifecycle(now);
         BigDecimal normalizedAmount = MoneyUtils.normalize(amount);
         ensureAuctionRunning(auction, now);
-        if (normalizedAmount.compareTo(auction.getCurrentprice()) <= 0) {
+        if (normalizedAmount.compareTo(auction.getCurrentPrice()) <= 0) {
             throw new IllegalArgumentException("Gia dau phai cao hon gia hien tai");
         }
         auction.addBid(createBid(auction, bidder, normalizedAmount, now, BidSource.MANUAL), now);
@@ -46,7 +46,7 @@ public final class AuctionRulesEngine {
         if (normalizedIncrement.signum() <= 0) {
             throw new IllegalArgumentException("Buoc gia phai lon hon 0");
         }
-        if (normalizedMax.compareTo(auction.getCurrentprice()) <= 0) {
+        if (normalizedMax.compareTo(auction.getCurrentPrice()) <= 0) {
             throw new IllegalArgumentException("maxBid phai cao hon gia hien tai");
         }
         AutoBidConfig config = auction.findAutoBid(bidder.getId())
@@ -83,7 +83,7 @@ public final class AuctionRulesEngine {
         if (bidder.getRole() != Role.BIDDER) {
             throw new IllegalStateException("Chi bidder moi co the dat gia");
         }
-        if (auction.getSellerid().equals(bidder.getId())) {
+        if (auction.getSellerId().equals(bidder.getId())) {
             throw new IllegalStateException("Seller khong duoc tu dau gia san pham cua minh");
         }
     }
@@ -118,9 +118,9 @@ public final class AuctionRulesEngine {
                     .sorted(Comparator.comparing(AutoBidConfig::getRegisteredAt))
                     .toList();
             for (AutoBidConfig config : orderedConfigs) {
-                BigDecimal nextBid = auction.getCurrentprice().add(config.getIncrement());
+                BigDecimal nextBid = auction.getCurrentPrice().add(config.getIncrement());
                 BigDecimal actualBid = config.getMaxBid().min(nextBid);
-                if (actualBid.compareTo(auction.getCurrentprice()) > 0) {
+                if (actualBid.compareTo(auction.getCurrentPrice()) > 0) {
                     User systemProxy = new ProxyBidder(config.getBidderId(), config.getBidderName());
                     auction.addBid(createBid(auction, systemProxy, actualBid, now, BidSource.AUTO), now);
                     changed = true;
@@ -130,10 +130,10 @@ public final class AuctionRulesEngine {
                         ? null
                         : auction.findAutoBid(auction.getLeadingBidderId()).orElse(null);
                 if (currentLeaderConfig != null
-                        && config.getMaxBid().compareTo(auction.getCurrentprice()) == 0
-                        && currentLeaderConfig.getMaxBid().compareTo(auction.getCurrentprice()) == 0
+                        && config.getMaxBid().compareTo(auction.getCurrentPrice()) == 0
+                        && currentLeaderConfig.getMaxBid().compareTo(auction.getCurrentPrice()) == 0
                         && config.getRegisteredAt().isBefore(currentLeaderConfig.getRegisteredAt())) {
-                    auction.setLeader(config.getBidderId(), config.getBidderName(), auction.getCurrentprice(), now);
+                    auction.setLeader(config.getBidderId(), config.getBidderName(), auction.getCurrentPrice(), now);
                     changed = true;
                 }
             }

@@ -47,7 +47,7 @@ public final class AuctionService {
     public List<Auction> listMyAuctions(User seller) {
         ensureSeller(seller);
         return auctions.values().stream()
-                .filter(auction -> auction.getSellerid().equals(seller.getId()))
+                .filter(auction -> auction.getSellerId().equals(seller.getId()))
                 .sorted(Comparator.comparing(Auction::getStartTime).reversed())
                 .toList();
     }
@@ -102,7 +102,7 @@ public final class AuctionService {
             return auction;
         }
         Auction auction = getAuction(request.auctionId());
-        if (!auction.getSellerid().equals(seller.getId())) {
+        if (!auction.getSellerId().equals(seller.getId())) {
             throw new IllegalStateException("Ban khong co quyen sua phien dau gia nay");
         }
         if (!auction.canEdit()) {
@@ -113,8 +113,8 @@ public final class AuctionService {
         try {
             auction.getItem().setName(request.name(), now);
             auction.getItem().setDescription(request.description(), now);
-            auction.getItem().setSpecialfield(request.specialField(), now);
-            auction.getItem().setStartingprice(MoneyUtils.normalize(request.startingPrice()), now);
+            auction.getItem().setSpecialField(request.specialField(), now);
+            auction.getItem().setStartingPrice(MoneyUtils.normalize(request.startingPrice()), now);
             auction.setStartTime(request.startTime(), now);
             auction.setEndTime(request.endTime(), now);
             auction.setLeader(null, null, MoneyUtils.normalize(request.startingPrice()), now);
@@ -130,7 +130,7 @@ public final class AuctionService {
     public void deleteAuction(User seller, UUID auctionId) {
         ensureSeller(seller);
         Auction auction = getAuction(auctionId);
-        if (!auction.getSellerid().equals(seller.getId())) {
+        if (!auction.getSellerId().equals(seller.getId())) {
             throw new IllegalStateException("Ban khong co quyen xoa phien dau gia nay");
         }
         if (!auction.canEdit()) {
@@ -169,7 +169,7 @@ public final class AuctionService {
 
     public Auction updateStatus(User actor, UUID auctionId, AuctionStatus status, LocalDateTime now) {
         Auction auction = getAuction(auctionId);
-        if (actor.getRole() != Role.ADMIN && !auction.getSellerid().equals(actor.getId())) {
+        if (actor.getRole() != Role.ADMIN && !auction.getSellerId().equals(actor.getId())) {
             throw new IllegalStateException("Ban khong co quyen cap nhat trang thai");
         }
         Lock lock = lockOf(auctionId);
@@ -207,7 +207,7 @@ public final class AuctionService {
     }
 
     public String sellerName(Auction auction) {
-        return userDao.findById(auction.getSellerid())
+        return userDao.findById(auction.getSellerId())
                 .map(User::getDisplayName)
                 .orElse("Unknown Seller");
     }

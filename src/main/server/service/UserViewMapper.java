@@ -12,6 +12,6 @@ public final class UserViewMapper {
     }
 
     public static UserRowDto toRow(User user) {
-        return new UserRowDto(user.getId(), user.getUsername(), user.getDisplayName(), user.getRole(), user.getCreateAt());
+        return new UserRowDto(user.getId(), user.getUsername(), user.getDisplayName(), user.getRole(), user.getCreatedAt());
     }
 }

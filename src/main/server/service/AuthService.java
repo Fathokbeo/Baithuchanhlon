@@ -20,7 +20,7 @@ public final class AuthService {
 
     public User login(String username, String password) {
         return userDao.findByUsername(username)
-                .filter(user -> PasswordUtils.matches(password, user.getPassword()))
+                .filter(user -> PasswordUtils.matches(password, user.getPasswordHash()))
                 .orElseThrow(() -> new IllegalArgumentException("Sai ten dang nhap hoac mat khau"));
     }
 
