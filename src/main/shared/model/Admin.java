@@ -3,15 +3,15 @@ package main.shared.model;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
-public class Admin extends User {
+public final class Admin extends User {
     public Admin(
             UUID id,
-            LocalDateTime createAt,
-            LocalDateTime updateAt,
+            LocalDateTime createdAt,
+            LocalDateTime updatedAt,
             String username,
-            String password,
+            String passwordHash,
             String displayName
-    ){
-        super(id, createAt, updateAt, username, password, displayName, Role.ADMIN);
+    ) {
+        super(id, createdAt, updatedAt, username, passwordHash, displayName, Role.ADMIN);
     }
 }

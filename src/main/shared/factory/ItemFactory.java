@@ -22,11 +22,11 @@ public final class ItemFactory {
             String specialField
     ){
         return switch (type){
-            case ELECTRONICS -> new Electronic(id,createAt,updateAt, sellerId, name, description, startingPrice, specialField);
+            case ELECTRONICS -> new Electronics(id,createAt,updateAt, sellerId, name, description, startingPrice, specialField);
 
-            case ARTS -> new Art(id,createAt,updateAt, sellerId, name, description, startingPrice, specialField);
+            case ART -> new Art(id,createAt,updateAt, sellerId, name, description, startingPrice, specialField);
 
-            case VEHICLES -> new Vehicle(id,createAt,updateAt, sellerId, name, description, startingPrice, specialField);
+            case VEHICLE -> new Vehicle(id,createAt,updateAt, sellerId, name, description, startingPrice, specialField);
         };
     }
 }

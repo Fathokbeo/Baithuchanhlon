@@ -20,7 +20,7 @@ public final class JsonUtils {
         return MAPPER;
     }
 
-    public static com.fasterxml.jackson.databind.JsonNode toJsonNode(Object value) {
+    public static JsonNode toJsonNode(Object value) {
         return MAPPER.valueToTree(value);
     }
 

@@ -4,54 +4,53 @@ import java.time.LocalDateTime;
 import java.util.Objects;
 import java.util.UUID;
 
-public class User extends Entity{
+public abstract class User extends Entity {
     private final String username;
-    private final String password;
+    private final String passwordHash;
     private String displayName;
-    Role role;
+    private final Role role;
 
-    public User(
+    protected User(
             UUID id,
-            LocalDateTime createAt,
-            LocalDateTime updateAt,
+            LocalDateTime createdAt,
+            LocalDateTime updatedAt,
             String username,
-            String password,
+            String passwordHash,
             String displayName,
             Role role
-    ){
-        super(id,createAt,updateAt);
-        this.username = requireText(username,"username");
-        this.password = requireText(password,"password");
-        this.displayName = requireText(displayName,"displayName");
-        this.role = Objects.requireNonNull(role,"role");
+    ) {
+        super(id, createdAt, updatedAt);
+        this.username = requireText(username, "username");
+        this.passwordHash = requireText(passwordHash, "passwordHash");
+        this.displayName = requireText(displayName, "displayName");
+        this.role = Objects.requireNonNull(role, "role");
     }
 
     public String getUsername() {
         return username;
     }
 
-    public String getPassword() {
-        return password;
+    public String getPasswordHash() {
+        return passwordHash;
     }
 
-    public String getDisplayName(){
+    public String getDisplayName() {
         return displayName;
+    }
+
+    public void setDisplayName(String displayName, LocalDateTime timestamp) {
+        this.displayName = requireText(displayName, "displayName");
+        touch(timestamp);
     }
 
     public Role getRole() {
         return role;
     }
 
-    public void setDisplayName(String displayName,LocalDateTime timestamp) {
-        this.displayName = requireText(displayName,"displayName");
-        touch(timestamp);
-    }
-//phương thức yêu cầu người dùng phải nhập ầu vào không cho để trống
-    protected static String requireText(String value, String fieldName){
-        if(value == null || value.isBlank()){
+    protected static String requireText(String value, String fieldName) {
+        if (value == null || value.isBlank()) {
             throw new IllegalArgumentException(fieldName + " must not be blank");
         }
         return value.trim();
     }
-
 }

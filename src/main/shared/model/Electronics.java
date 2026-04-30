@@ -4,8 +4,8 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
-public final class Vehicle extends Item {
-    public Vehicle(
+public final class Electronics extends Item {
+    public Electronics(
             UUID id,
             LocalDateTime createdAt,
             LocalDateTime updatedAt,
@@ -20,11 +20,11 @@ public final class Vehicle extends Item {
 
     @Override
     public ItemType getType() {
-        return ItemType.VEHICLE;
+        return ItemType.ELECTRONICS;
     }
 
     @Override
     public String printInfo() {
-        return "Vehicle | " + getSpecialField();
+        return "Electronics | " + getSpecialField();
     }
 }

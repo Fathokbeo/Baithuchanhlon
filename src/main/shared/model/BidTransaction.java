@@ -10,31 +10,27 @@ public final class BidTransaction extends Entity {
     private final UUID bidderId;
     private final String bidderName;
     private final BigDecimal amount;
-    private final BidSource source;
     private final LocalDateTime bidTime;
+    private final BidSource source;
 
     public BidTransaction(
             UUID id,
-            LocalDateTime createAt,
-            LocalDateTime updateAt,
+            LocalDateTime createdAt,
+            LocalDateTime updatedAt,
             UUID auctionId,
             UUID bidderId,
             String bidderName,
             BigDecimal amount,
-            BidSource source,
-            LocalDateTime bidTime
-    ){
-        super(id,createAt,updateAt);
-        this.auctionId = Objects.requireNonNull(auctionId,"auctionId");
-        this.bidderId = Objects.requireNonNull(bidderId,"bidderId");
-        this.bidderName = Objects.requireNonNull(bidderName,"bidderName");
-        this.amount = Objects.requireNonNull(amount,"amount");
-        this.source = Objects.requireNonNull(source,"source");
-        this.bidTime = Objects.requireNonNull(bidTime,"bidTime");
-    }
-
-    public BidSource getSource() {
-        return source;
+            LocalDateTime bidTime,
+            BidSource source
+    ) {
+        super(id, createdAt, updatedAt);
+        this.auctionId = Objects.requireNonNull(auctionId, "auctionId");
+        this.bidderId = Objects.requireNonNull(bidderId, "bidderId");
+        this.bidderName = Objects.requireNonNull(bidderName, "bidderName");
+        this.amount = Objects.requireNonNull(amount, "amount");
+        this.bidTime = Objects.requireNonNull(bidTime, "bidTime");
+        this.source = Objects.requireNonNull(source, "source");
     }
 
     public UUID getAuctionId() {
@@ -55,5 +51,9 @@ public final class BidTransaction extends Entity {
 
     public LocalDateTime getBidTime() {
         return bidTime;
+    }
+
+    public BidSource getSource() {
+        return source;
     }
 }
