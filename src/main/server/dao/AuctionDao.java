@@ -1,5 +1,4 @@
 package main.server.dao;
-package com.auctionapp.server.dao;
 
 import main.shared.factory.ItemFactory;
 import main.shared.model.Auction;
