@@ -6,32 +6,36 @@ import java.util.Objects;
 import java.util.UUID;
 
 public abstract class Item extends Entity {
-    private final UUID sellerid;
+    private final UUID sellerId;
     private String name;
     private String description;
-    private BigDecimal startingprice;
-    private String specialfield;
+    private BigDecimal startingPrice;
+    private String specialField;
 
-    public Item(
+    protected Item(
             UUID id,
-            LocalDateTime createAt,
-            LocalDateTime updateAt,
-            UUID sellerid,
+            LocalDateTime createdAt,
+            LocalDateTime updatedAt,
+            UUID sellerId,
             String name,
             String description,
-            BigDecimal startingprice,
-            String specialfield
-    ){
-        super(id, createAt, updateAt);
-        this.sellerid = Objects.requireNonNull(sellerid,"sellerid");
-        this.name = User.requireText(name,"name");
-        this.description = User.requireText(description,"description");
-        this.startingprice = Objects.requireNonNull(startingprice,"startingprice");
-        this.specialfield = User.requireText(specialfield,"specialfield");
+            BigDecimal startingPrice,
+            String specialField
+    ) {
+        super(id, createdAt, updatedAt);
+        this.sellerId = Objects.requireNonNull(sellerId, "sellerId");
+        this.name = User.requireText(name, "name");
+        this.description = User.requireText(description, "description");
+        this.startingPrice = Objects.requireNonNull(startingPrice, "startingPrice");
+        this.specialField = User.requireText(specialField, "specialField");
     }
 
-    public UUID getSellerid() {
-        return sellerid;
+    public abstract ItemType getType();
+
+    public abstract String printInfo();
+
+    public UUID getSellerId() {
+        return sellerId;
     }
 
     public String getName() {
@@ -39,7 +43,7 @@ public abstract class Item extends Entity {
     }
 
     public void setName(String name, LocalDateTime timestamp) {
-        this.name = User.requireText(name,"name");
+        this.name = User.requireText(name, "name");
         touch(timestamp);
     }
 
@@ -52,21 +56,21 @@ public abstract class Item extends Entity {
         touch(timestamp);
     }
 
-    public BigDecimal getStartingprice() {
-        return startingprice;
+    public BigDecimal getStartingPrice() {
+        return startingPrice;
     }
 
-    public void setStartingprice(BigDecimal startingprice, LocalDateTime timestamp) {
-        this.startingprice = Objects.requireNonNull(startingprice,"starting price");
+    public void setStartingPrice(BigDecimal startingPrice, LocalDateTime timestamp) {
+        this.startingPrice = Objects.requireNonNull(startingPrice, "startingPrice");
         touch(timestamp);
     }
 
-    public void setSpecialfield(String specialfield,LocalDateTime timestamp) {
-        this.specialfield = User.requireText(specialfield,"specialfield");
-        touch(timestamp);
+    public String getSpecialField() {
+        return specialField;
     }
 
-    public String getSpecialfield() {
-        return specialfield;
+    public void setSpecialField(String specialField, LocalDateTime timestamp) {
+        this.specialField = User.requireText(specialField, "specialField");
+        touch(timestamp);
     }
 }

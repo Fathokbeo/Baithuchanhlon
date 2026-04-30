@@ -4,25 +4,27 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
-public class Vehicle extends Item{
+public final class Vehicle extends Item {
     public Vehicle(
             UUID id,
-            LocalDateTime createAt,
-            LocalDateTime updateAt,
-            UUID sellerid,
+            LocalDateTime createdAt,
+            LocalDateTime updatedAt,
+            UUID sellerId,
             String name,
             String description,
-            BigDecimal startingprice,
-            String specialfield
-    ){
-        super(id,createAt,updateAt,sellerid,name,description,startingprice,specialfield);
+            BigDecimal startingPrice,
+            String specialField
+    ) {
+        super(id, createdAt, updatedAt, sellerId, name, description, startingPrice, specialField);
     }
 
-    public ItemType getType(){
-        return ItemType.VEHICLES;
+    @Override
+    public ItemType getType() {
+        return ItemType.VEHICLE;
     }
 
-    public String getInfo(){
-        return "VEHICLE" + getSpecialfield();
+    @Override
+    public String printInfo() {
+        return "Vehicle | " + getSpecialField();
     }
 }

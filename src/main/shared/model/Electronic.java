@@ -4,25 +4,27 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
-public class Electronic extends Item {
-    public Electronic(
+public final class Electronics extends Item {
+    public Electronics(
             UUID id,
-            LocalDateTime createAt,
-            LocalDateTime updateAt,
-            UUID sellerid,
+            LocalDateTime createdAt,
+            LocalDateTime updatedAt,
+            UUID sellerId,
             String name,
             String description,
-            BigDecimal startingprice,
-            String specialfield
-    ){
-        super(id,createAt,updateAt,sellerid,name,description,startingprice,specialfield);
+            BigDecimal startingPrice,
+            String specialField
+    ) {
+        super(id, createdAt, updatedAt, sellerId, name, description, startingPrice, specialField);
     }
 
-    public ItemType getType(){
+    @Override
+    public ItemType getType() {
         return ItemType.ELECTRONICS;
     }
 
-    public String getInfo(){
-        return "ELECTRONIC "+ getSpecialfield();
+    @Override
+    public String printInfo() {
+        return "Electronics | " + getSpecialField();
     }
 }
