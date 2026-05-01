@@ -1,132 +1,63 @@
 package main.server.net;
-import main.shared.dto.AuctionEventDto;
-import main.shared.protocol.ApiMessage;
-import main.shared.protocol.MessageCategory;
-import main.shared.protocol.MessageType;
-import main.shared.util.JsonUtils;
 
-import java.io.BufferedReader;
+import main.server.controller.ServerRequestController;
+
 import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.PrintWriter;
+import java.net.BindException;
+import java.net.ServerSocket;
 import java.net.Socket;
-import java.nio.charset.StandardCharsets;
-import java.time.Duration;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.CompletionException;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
-public final class AuctionClientConnection implements AutoCloseable {
-    private final String host;
+public final class AuctionSocketServer implements AutoCloseable {
     private final int port;
-    private final Map<String, CompletableFuture<ApiMessage>> pendingRequests = new ConcurrentHashMap<>();
-    private final List<java.util.function.Consumer<AuctionEventDto>> auctionListeners = new CopyOnWriteArrayList<>();
+    private final ServerRequestController controller;
+    private final SessionRegistry registry;
+    private final ExecutorService clientPool = Executors.newCachedThreadPool();
+    private ServerSocket serverSocket;
+    private Thread acceptThread;
 
-    private Socket socket;
-    private PrintWriter writer;
-    private Thread readerThread;
-
-    public AuctionClientConnection(String host, int port) {
-        this.host = host;
+    public AuctionSocketServer(int port, ServerRequestController controller, SessionRegistry registry) {
         this.port = port;
+        this.controller = controller;
+        this.registry = registry;
     }
 
-    public void connectWithRetry() {
-        RuntimeException lastException = null;
-        for (int attempt = 0; attempt < 20; attempt++) {
-            try {
-                connect();
-                return;
-            } catch (RuntimeException exception) {
-                lastException = exception;
+    public boolean start() {
+        try {
+            serverSocket = new ServerSocket(port);
+        } catch (BindException bindException) {
+            return false;
+        } catch (IOException exception) {
+            throw new IllegalStateException("Cannot start socket server", exception);
+        }
+
+        acceptThread = new Thread(() -> {
+            while (!serverSocket.isClosed()) {
                 try {
-                    Thread.sleep(Duration.ofMillis(250));
-                } catch (InterruptedException interruptedException) {
-                    Thread.currentThread().interrupt();
-                    throw exception;
-                }
-            }
-        }
-        throw lastException == null ? new IllegalStateException("Cannot connect to server") : lastException;
-    }
-
-    public void connect() {
-        try {
-            socket = new Socket(host, port);
-            writer = new PrintWriter(socket.getOutputStream(), true, StandardCharsets.UTF_8);
-            BufferedReader reader = new BufferedReader(new InputStreamReader(socket.getInputStream(), StandardCharsets.UTF_8));
-            readerThread = new Thread(() -> readLoop(reader), "auction-client-reader");
-            readerThread.setDaemon(true);
-            readerThread.start();
-        } catch (IOException exception) {
-            throw new IllegalStateException("Khong the ket noi toi server", exception);
-        }
-    }
-
-    public <T> CompletableFuture<T> sendRequest(MessageType type, Object payload, Class<T> responseType) {
-        String requestId = UUID.randomUUID().toString();
-        CompletableFuture<ApiMessage> responseFuture = new CompletableFuture<>();
-        pendingRequests.put(requestId, responseFuture);
-        writer.println(JsonUtils.write(new ApiMessage(
-                MessageCategory.REQUEST,
-                type,
-                requestId,
-                true,
-                payload == null ? null : JsonUtils.toJsonNode(payload)
-        )));
-        writer.flush();
-        return responseFuture.thenApply(response -> {
-            if (!response.isSuccess()) {
-                throw new CompletionException(new IllegalStateException(response.getErrorMessage()));
-            }
-            if (responseType == Void.class || response.getPayload() == null) {
-                return null;
-            }
-            return JsonUtils.fromJsonNode(response.getPayload(), responseType);
-        });
-    }
-
-    public void addAuctionListener(java.util.function.Consumer<AuctionEventDto> listener) {
-        auctionListeners.add(listener);
-    }
-
-    public void removeAuctionListener(java.util.function.Consumer<AuctionEventDto> listener) {
-        auctionListeners.remove(listener);
-    }
-
-    private void readLoop(BufferedReader reader) {
-        try {
-            String line;
-            while ((line = reader.readLine()) != null) {
-                ApiMessage message = JsonUtils.read(line, ApiMessage.class);
-                if (message.getCategory() == MessageCategory.RESPONSE) {
-                    CompletableFuture<ApiMessage> future = pendingRequests.remove(message.getRequestId());
-                    if (future != null) {
-                        future.complete(message);
+                    Socket clientSocket = serverSocket.accept();
+                    clientPool.submit(new ClientSession(clientSocket, controller, registry));
+                } catch (IOException exception) {
+                    if (!serverSocket.isClosed()) {
+                        throw new IllegalStateException("Cannot accept client connection", exception);
                     }
-                } else if (message.getCategory() == MessageCategory.EVENT
-                        && message.getType() == MessageType.AUCTION_CHANGED) {
-                    AuctionEventDto event = JsonUtils.fromJsonNode(message.getPayload(), AuctionEventDto.class);
-                    auctionListeners.forEach(listener -> listener.accept(event));
                 }
             }
-        } catch (IOException exception) {
-            pendingRequests.values().forEach(future -> future.completeExceptionally(exception));
-            pendingRequests.clear();
-        }
+        }, "auction-server-accept");
+        acceptThread.setDaemon(true);
+        acceptThread.start();
+        return true;
     }
 
     @Override
     public void close() {
         try {
-            if (socket != null) {
-                socket.close();
+            if (serverSocket != null) {
+                serverSocket.close();
             }
         } catch (IOException ignored) {
         }
+        registry.closeAll();
+        clientPool.shutdownNow();
     }
 }
