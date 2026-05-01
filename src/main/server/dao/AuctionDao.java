@@ -126,24 +126,24 @@ public final class AuctionDao {
                 """)) {
    Item item = auction.getItem();
    statement.setString(1, auction.getId().toString());
-   statement.setString(2, auction.getSellerid().toString());
+   statement.setString(2, auction.getSellerId().toString());
    statement.setString(3, item.getId().toString());
    statement.setString(4, item.getType().name());
    statement.setString(5, item.getName());
    statement.setString(6, item.getDescription());
-   statement.setBigDecimal(7, item.getStartingprice());
-   statement.setBigDecimal(8, auction.getCurrentprice());
-   statement.setString(9, item.getSpecialfield());
+   statement.setBigDecimal(7, item.getStartingPrice());
+   statement.setBigDecimal(8, auction.getCurrentPrice());
+   statement.setString(9, item.getSpecialField());
    statement.setString(10, auction.getLeadingBidderId() == null ? null : auction.getLeadingBidderId().toString());
-   statement.setString(11, auction.getLeadingBiddername());
+   statement.setString(11, auction.getLeadingBidderName());
    statement.setString(12, auction.getWinnerBidderId() == null ? null : auction.getWinnerBidderId().toString());
-   statement.setString(13, auction.getWinnerBiddername());
+   statement.setString(13, auction.getWinnerBidderName());
    statement.setString(14, auction.getStatus().name());
    statement.setTimestamp(15, Timestamp.valueOf(auction.getStartTime()));
    statement.setTimestamp(16, Timestamp.valueOf(auction.getEndTime()));
-   statement.setInt(17, auction.getExtentionCount());
-   statement.setTimestamp(18, Timestamp.valueOf(auction.getCreateAt()));
-   statement.setTimestamp(19, Timestamp.valueOf(auction.getUpdateAt()));
+   statement.setInt(17, auction.getExtensionCount());
+   statement.setTimestamp(18, Timestamp.valueOf(auction.getCreatedAt()));
+   statement.setTimestamp(19, Timestamp.valueOf(auction.getUpdatedAt()));
    statement.executeUpdate();
   }
  }
@@ -171,8 +171,8 @@ public final class AuctionDao {
     statement.setBigDecimal(5, bid.getAmount());
     statement.setTimestamp(6, Timestamp.valueOf(bid.getBidTime()));
     statement.setString(7, bid.getSource().name());
-    statement.setTimestamp(8, Timestamp.valueOf(bid.getCreateAt()));
-    statement.setTimestamp(9, Timestamp.valueOf(bid.getUpdateAt()));
+    statement.setTimestamp(8, Timestamp.valueOf(bid.getCreatedAt()));
+    statement.setTimestamp(9, Timestamp.valueOf(bid.getUpdatedAt()));
     statement.addBatch();
    }
    statement.executeBatch();
@@ -194,8 +194,8 @@ public final class AuctionDao {
     statement.setBigDecimal(6, config.getIncrement());
     statement.setTimestamp(7, Timestamp.valueOf(config.getRegisteredAt()));
     statement.setBoolean(8, config.isActive());
-    statement.setTimestamp(9, Timestamp.valueOf(config.getCreateAt()));
-    statement.setTimestamp(10, Timestamp.valueOf(config.getUpdateAt()));
+    statement.setTimestamp(9, Timestamp.valueOf(config.getCreatedAt()));
+    statement.setTimestamp(10, Timestamp.valueOf(config.getUpdatedAt()));
     statement.addBatch();
    }
    statement.executeBatch();
