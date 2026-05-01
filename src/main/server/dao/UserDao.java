@@ -33,11 +33,11 @@ public final class UserDao {
                      """)) {
             statement.setString(1, user.getId().toString());
             statement.setString(2, user.getUsername());
-            statement.setString(3, user.getPassword());
+            statement.setString(3, user.getPasswordHash());
             statement.setString(4, user.getDisplayName());
             statement.setString(5, user.getRole().name());
-            statement.setTimestamp(6, Timestamp.valueOf(user.getCreateAt()));
-            statement.setTimestamp(7, Timestamp.valueOf(user.getUpdateAt()));
+            statement.setTimestamp(6, Timestamp.valueOf(user.getCreatedAt()));
+            statement.setTimestamp(7, Timestamp.valueOf(user.getUpdatedAt()));
             statement.executeUpdate();
         } catch (SQLException exception) {
             throw new IllegalStateException("Cannot save user", exception);
