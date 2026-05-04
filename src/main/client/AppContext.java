@@ -10,9 +10,11 @@ import javafx.scene.Scene;
 import javafx.stage.Stage;
 
 import java.io.IOException;
+import java.net.URL;
 
 public final class AppContext {
     private static final int DEFAULT_SERVER_PORT = 5555;
+    private static final String[] RESOURCE_ROOTS = {"", "/main/resources"};
 
     private static Stage primaryStage;
     private static AuctionClientConnection connection;
@@ -69,14 +71,25 @@ public final class AppContext {
 
     private static void showScene(String fxmlPath, double width, double height) {
         try {
-            FXMLLoader loader = new FXMLLoader(AppContext.class.getResource(fxmlPath));
+            FXMLLoader loader = new FXMLLoader(resolveResource(fxmlPath));
             Parent root = loader.load();
             Scene scene = new Scene(root, width, height);
-            scene.getStylesheets().add(AppContext.class.getResource("/css/app.css").toExternalForm());
+            scene.getStylesheets().add(resolveResource("/css/app.css").toExternalForm());
             primaryStage.setScene(scene);
             primaryStage.show();
         } catch (IOException exception) {
             throw new IllegalStateException("Cannot load FXML: " + fxmlPath, exception);
         }
+    }
+
+    private static URL resolveResource(String resourcePath) {
+        String normalizedPath = resourcePath.startsWith("/") ? resourcePath : "/" + resourcePath;
+        for (String root : RESOURCE_ROOTS) {
+            URL resource = AppContext.class.getResource(root + normalizedPath);
+            if (resource != null) {
+                return resource;
+            }
+        }
+        throw new IllegalStateException("Cannot find resource: " + normalizedPath);
     }
 }
