@@ -91,7 +91,7 @@
                 <artifactId>javafx-maven-plugin</artifactId>
                 <version>0.0.8</version>
                 <configuration>
-                    <mainClass>main.client.AuctionClientApp</mainClass>
+                    <mainClass>main.AuctionLauncher</mainClass>
                 </configuration>
             </plugin>
             <plugin>

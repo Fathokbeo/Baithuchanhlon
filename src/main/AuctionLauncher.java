@@ -11,8 +11,12 @@ public final class AuctionLauncher {
 
     public static void main(String[] args) {
         AuctionEmbeddedServer embeddedServer = new AuctionEmbeddedServer();
-        embeddedServer.startIfNeeded();
-        AppContext.setEmbeddedServer(embeddedServer);
-        Application.launch(AuctionClientApp.class, args);
+        try {
+            embeddedServer.startIfNeeded();
+            AppContext.setEmbeddedServer(embeddedServer);
+            Application.launch(AuctionClientApp.class, args);
+        } finally {
+            embeddedServer.close();
+        }
     }
 }

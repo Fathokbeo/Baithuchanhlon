@@ -59,6 +59,11 @@ public final class AppContext {
     public static void shutdown() {
         if (connection != null) {
             connection.close();
+            connection = null;
+        }
+        if (embeddedServer != null) {
+            embeddedServer.close();
+            embeddedServer = null;
         }
     }
 
