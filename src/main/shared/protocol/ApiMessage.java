@@ -10,28 +10,23 @@ public class ApiMessage {
     private String errorMessage;
     private JsonNode payload;
 
-    public ApiMessage(){}
+    public ApiMessage() {
+    }
 
     public ApiMessage(
             MessageCategory category,
             MessageType type,
             String requestId,
             boolean success,
+            String errorMessage,
             JsonNode payload
-    ){
+    ) {
         this.category = category;
         this.type = type;
         this.requestId = requestId;
         this.success = success;
+        this.errorMessage = errorMessage;
         this.payload = payload;
-    }
-
-    public MessageType getType() {
-        return type;
-    }
-
-    public void setType(MessageType type) {
-        this.type = type;
     }
 
     public MessageCategory getCategory() {
@@ -40,6 +35,14 @@ public class ApiMessage {
 
     public void setCategory(MessageCategory category) {
         this.category = category;
+    }
+
+    public MessageType getType() {
+        return type;
+    }
+
+    public void setType(MessageType type) {
+        this.type = type;
     }
 
     public String getRequestId() {

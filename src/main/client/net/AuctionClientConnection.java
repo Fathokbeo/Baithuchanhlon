@@ -77,6 +77,7 @@ public final class AuctionClientConnection implements AutoCloseable {
                 type,
                 requestId,
                 true,
+                null,
                 payload == null ? null : JsonUtils.toJsonNode(payload)
         )));
         writer.flush();
