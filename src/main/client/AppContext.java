@@ -3,6 +3,7 @@ package main.client;
 import main.client.net.AuctionClientConnection;
 import main.client.service.ClientSessionService;
 import main.client.state.ClientState;
+import main.server.AuctionEmbeddedServer;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
@@ -17,8 +18,13 @@ public final class AppContext {
     private static AuctionClientConnection connection;
     private static ClientSessionService clientSessionService;
     private static ClientState clientState;
+    private static AuctionEmbeddedServer embeddedServer;
 
     private AppContext() {
+    }
+
+    public static void setEmbeddedServer(AuctionEmbeddedServer embeddedServer) {
+        AppContext.embeddedServer = embeddedServer;
     }
 
     public static void initialize(Stage stage) {
