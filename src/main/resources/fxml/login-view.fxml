@@ -19,7 +19,7 @@
                 <Insets bottom="16.0" left="32.0" right="32.0" top="28.0" />
             </padding>
             <Label styleClass="app-title" text="Auction App" />
-            <Label styleClass="app-subtitle" text="Nền tảng đấu giá trực tuyến realtime với Java + JavaFX" />
+            <Label styleClass="app-subtitle" text="Nền tảng đấu giá trực tuyến" />
         </VBox>
     </top>
     <center>
