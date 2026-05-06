@@ -22,6 +22,8 @@ public final class LoginController {
     @FXML
     private PasswordField registerPasswordField;
     @FXML
+    private PasswordField registerPasswordConfirmField;
+    @FXML
     private ComboBox<Role> roleComboBox;
     @FXML
     private Label statusLabel;
@@ -58,24 +60,29 @@ public final class LoginController {
         if (registerButton.isDisabled()) {
             return;
         }
-        setBusy(true, "Dang tao tai khoan...");
-        RegisterRequest request = new RegisterRequest(
-                registerUsernameField.getText().trim(),
-                registerPasswordField.getText(),
-                registerDisplayNameField.getText().trim(),
-                roleComboBox.getValue()
-        );
-        AppContext.service().register(request)
-                .thenAccept(response -> Platform.runLater(() -> {
-                    AppContext.state().setCurrentUser(response.user());
-                    openDashboard();
-                }))
-                .exceptionally(throwable -> {
-                    Platform.runLater(() -> setBusy(false, extractMessage(throwable)));
-                    return null;
-                });
+        String password = registerPasswordField.getText();
+        String confirmPassword = registerPasswordConfirmField.getText();
+        if (!password.equals(confirmPassword)) {
+            setBusy(false, "Xác nhận mật khẩu không khớp, vui lòng nhập lại");
+        } else {
+            setBusy(true, "Dang tao tai khoan...");
+            RegisterRequest request = new RegisterRequest(
+                    registerUsernameField.getText().trim(),
+                    registerPasswordField.getText(),
+                    registerDisplayNameField.getText().trim(),
+                    roleComboBox.getValue()
+            );
+            AppContext.service().register(request)
+                    .thenAccept(response -> Platform.runLater(() -> {
+                        AppContext.state().setCurrentUser(response.user());
+                        openDashboard();
+                    }))
+                    .exceptionally(throwable -> {
+                        Platform.runLater(() -> setBusy(false, extractMessage(throwable)));
+                        return null;
+                    });
+        }
     }
-
     private void setBusy(boolean busy, String message) {
         loginButton.setDisable(busy);
         registerButton.setDisable(busy);
