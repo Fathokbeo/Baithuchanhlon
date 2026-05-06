@@ -36,7 +36,7 @@ public final class DataSeeder {
         LocalDateTime now = LocalDateTime.now();
         Seller seller = new Seller(UUID.randomUUID(), now, now, "seller1", PasswordUtils.hash("seller123"), "Nguyen Seller");
         Bidder bidder1 = new Bidder(UUID.randomUUID(), now, now, "bidder1", PasswordUtils.hash("bid123"), "Tran Bidder");
-        Bidder bidder2 = new Bidder(UUID.randomUUID(), now, now, "bidder2", PasswordUtils.hash("bid123"), "Le AutoBid");
+        Bidder bidder2 = new Bidder(UUID.randomUUID(), now, now, "bidder2", PasswordUtils.hash("bid123"), "Le Bidder");
         Admin admin = new Admin(UUID.randomUUID(), now, now, "admin", PasswordUtils.hash("admin123"), "System Admin");
 
         List<User> users = List.of(seller, bidder1, bidder2, admin);
@@ -85,8 +85,7 @@ public final class DataSeeder {
                 now.minusMinutes(5),
                 now.plusMinutes(10),
                 0,
-                List.of(bid),
-                List.of()
+                List.of(bid)
         );
     }
 
@@ -117,7 +116,6 @@ public final class DataSeeder {
                 now.plusMinutes(2),
                 now.plusMinutes(25),
                 0,
-                List.of(),
                 List.of()
         );
     }
@@ -160,8 +158,7 @@ public final class DataSeeder {
                 now.minusHours(2),
                 now.minusMinutes(65),
                 0,
-                List.of(bid),
-                List.of()
+                List.of(bid)
         );
     }
 }

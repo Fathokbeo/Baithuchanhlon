@@ -1,7 +1,5 @@
 package main.server.service;
 
-
-import main.shared.dto.AutoBidDto;
 import main.shared.dto.AuctionDetailDto;
 import main.shared.dto.AuctionSummaryDto;
 import main.shared.dto.BidTransactionDto;
@@ -36,22 +34,12 @@ public final class AuctionViewMapper {
                         bid.getId(),
                         bid.getBidderName(),
                         bid.getAmount(),
-                        bid.getBidTime(),
-                        bid.getSource()
+                        bid.getBidTime()
                 ))
                 .toList();
         List<PricePointDto> priceHistory = new ArrayList<>();
         priceHistory.add(new PricePointDto(auction.getStartTime(), auction.getItem().getStartingPrice()));
         auction.getBidHistory().forEach(bid -> priceHistory.add(new PricePointDto(bid.getBidTime(), bid.getAmount())));
-        List<AutoBidDto> autoBids = auction.getAutoBidConfigs().stream()
-                .filter(config -> config.isActive())
-                .map(config -> new AutoBidDto(
-                        config.getBidderName(),
-                        config.getMaxBid(),
-                        config.getIncrement(),
-                        config.getRegisteredAt()
-                ))
-                .toList();
         return new AuctionDetailDto(
                 auction.getId(),
                 auction.getSellerId(),
@@ -69,8 +57,7 @@ public final class AuctionViewMapper {
                 auction.getWinnerBidderName(),
                 auction.getExtensionCount(),
                 bidHistory,
-                priceHistory,
-                autoBids
+                priceHistory
         );
     }
 }

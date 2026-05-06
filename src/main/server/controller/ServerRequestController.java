@@ -11,7 +11,6 @@ import main.shared.dto.AuctionEventDto;
 import main.shared.dto.AuctionIdRequest;
 import main.shared.dto.AuctionsResponse;
 import main.shared.dto.AuthResponse;
-import main.shared.dto.ConfigureAutoBidRequest;
 import main.shared.dto.LoginRequest;
 import main.shared.dto.PlaceBidRequest;
 import main.shared.dto.RegisterRequest;
@@ -50,7 +49,6 @@ public final class ServerRequestController {
                 case UPSERT_AUCTION -> handleUpsertAuction(session, request);
                 case DELETE_AUCTION -> handleDeleteAuction(session, request);
                 case PLACE_BID -> handlePlaceBid(session, request);
-                case CONFIGURE_AUTO_BID -> handleConfigureAutoBid(session, request);
                 case UPDATE_AUCTION_STATUS -> handleUpdateStatus(session, request);
                 case LIST_USERS -> handleListUsers(session, request);
                 case AUCTION_CHANGED -> sendError(session, request, "Client khong the gui su kien realtime");
@@ -141,17 +139,6 @@ public final class ServerRequestController {
                 AuctionViewMapper.toDetail(auction, auctionService.sellerName(auction))
         ));
         broadcastAuctionChange(auction, "BID_PLACED");
-    }
-
-    private void handleConfigureAutoBid(ClientSession session, ApiMessage request) {
-        User user = requireUser(session);
-        ConfigureAutoBidRequest payload = JsonUtils.fromJsonNode(request.getPayload(), ConfigureAutoBidRequest.class);
-        Auction auction = auctionService.configureAutoBid(user, payload.auctionId(), payload.maxBid(), payload.increment(),
-                LocalDateTime.now());
-        sendSuccess(session, request, new AuctionDetailResponse(
-                AuctionViewMapper.toDetail(auction, auctionService.sellerName(auction))
-        ));
-        broadcastAuctionChange(auction, "AUTO_BID_UPDATED");
     }
 
     private void handleUpdateStatus(ClientSession session, ApiMessage request) {

@@ -5,7 +5,6 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
-import java.util.Optional;
 import java.util.UUID;
 
 public final class Auction extends Entity {
@@ -21,7 +20,6 @@ public final class Auction extends Entity {
     private LocalDateTime endTime;
     private int extensionCount;
     private final List<BidTransaction> bidHistory;
-    private final List<AutoBidConfig> autoBidConfigs;
 
     public Auction(
             UUID id,
@@ -38,8 +36,7 @@ public final class Auction extends Entity {
             LocalDateTime startTime,
             LocalDateTime endTime,
             int extensionCount,
-            List<BidTransaction> bidHistory,
-            List<AutoBidConfig> autoBidConfigs
+            List<BidTransaction> bidHistory
     ) {
         super(id, createdAt, updatedAt);
         this.item = Objects.requireNonNull(item, "item");
@@ -54,7 +51,6 @@ public final class Auction extends Entity {
         this.endTime = Objects.requireNonNull(endTime, "endTime");
         this.extensionCount = extensionCount;
         this.bidHistory = new ArrayList<>(Objects.requireNonNull(bidHistory, "bidHistory"));
-        this.autoBidConfigs = new ArrayList<>(Objects.requireNonNull(autoBidConfigs, "autoBidConfigs"));
     }
 
     public Item getItem() {
@@ -131,25 +127,9 @@ public final class Auction extends Entity {
         return bidHistory;
     }
 
-    public List<AutoBidConfig> getAutoBidConfigs() {
-        return autoBidConfigs;
-    }
-
     public void addBid(BidTransaction bid, LocalDateTime timestamp) {
         bidHistory.add(Objects.requireNonNull(bid, "bid"));
         setLeader(bid.getBidderId(), bid.getBidderName(), bid.getAmount(), timestamp);
-    }
-
-    public Optional<AutoBidConfig> findAutoBid(UUID bidderId) {
-        return autoBidConfigs.stream()
-                .filter(config -> config.getBidderId().equals(bidderId))
-                .findFirst();
-    }
-
-    public void addOrReplaceAutoBid(AutoBidConfig config, LocalDateTime timestamp) {
-        autoBidConfigs.removeIf(existing -> existing.getBidderId().equals(config.getBidderId()));
-        autoBidConfigs.add(config);
-        touch(timestamp);
     }
 
     public boolean canEdit() {

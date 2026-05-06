@@ -43,18 +43,17 @@ public final class LoginController {
         if (loginButton.isDisabled()) {
             return;
         }
-        setBusy(true, "Dang dang nhap...");
-        AppContext.service().login(loginUsernameField.getText().trim(), loginPasswordField.getText())
-                .thenAccept(response -> Platform.runLater(() -> {
-                    AppContext.state().setCurrentUser(response.user());
-                    openDashboard();
-                }))
-                .exceptionally(throwable -> {
-                    Platform.runLater(() -> setBusy(false, extractMessage(throwable)));
-                    return null;
-                });
-    }
-
+            setBusy(true, "Dang dang nhap...");
+            AppContext.service().login(loginUsernameField.getText().trim(), loginPasswordField.getText())
+                    .thenAccept(response -> Platform.runLater(() -> {
+                        AppContext.state().setCurrentUser(response.user());
+                        openDashboard();
+                    }))
+                    .exceptionally(throwable -> {
+                        Platform.runLater(() -> setBusy(false, extractMessage(throwable)));
+                        return null;
+                    });
+        }
     @FXML
     private void handleRegister() {
         if (registerButton.isDisabled()) {
@@ -63,7 +62,7 @@ public final class LoginController {
         String password = registerPasswordField.getText();
         String confirmPassword = registerPasswordConfirmField.getText();
         if (!password.equals(confirmPassword)) {
-            setBusy(false, "Xác nhận mật khẩu không khớp, vui lòng nhập lại");
+            setBusy(false, "Mật khẩu xác nhận sai, vui lòng kiểm tra lại");
         } else {
             setBusy(true, "Dang tao tai khoan...");
             RegisterRequest request = new RegisterRequest(

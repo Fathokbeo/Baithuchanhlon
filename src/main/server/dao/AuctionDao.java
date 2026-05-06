@@ -3,7 +3,6 @@ package main.server.dao;
 import main.shared.factory.ItemFactory;
 import main.shared.model.Auction;
 import main.shared.model.AuctionStatus;
-import main.shared.model.AutoBidConfig;
 import main.shared.model.BidSource;
 import main.shared.model.BidTransaction;
 import main.shared.model.Item;
@@ -76,11 +75,10 @@ public final class AuctionDao {
   try (Connection connection = databaseManager.getConnection()) {
    connection.setAutoCommit(false);
    try {
-    writeAuction(connection, auction);
-    deleteChildren(connection, auction.getId());
-    writeBids(connection, auction);
-    writeAutoBids(connection, auction);
-    connection.commit();
+     writeAuction(connection, auction);
+     deleteChildren(connection, auction.getId());
+     writeBids(connection, auction);
+     connection.commit();
    } catch (SQLException exception) {
     connection.rollback();
     throw exception;
@@ -95,15 +93,12 @@ public final class AuctionDao {
  public void deleteAuction(UUID auctionId) {
   try (Connection connection = databaseManager.getConnection()) {
    connection.setAutoCommit(false);
-   try (PreparedStatement deleteBids = connection.prepareStatement("delete from bids where auction_id = ?");
-        PreparedStatement deleteAutoBids = connection.prepareStatement("delete from auto_bids where auction_id = ?");
-        PreparedStatement deleteAuction = connection.prepareStatement("delete from auctions where id = ?")) {
-    deleteBids.setString(1, auctionId.toString());
-    deleteAutoBids.setString(1, auctionId.toString());
-    deleteAuction.setString(1, auctionId.toString());
-    deleteBids.executeUpdate();
-    deleteAutoBids.executeUpdate();
-    deleteAuction.executeUpdate();
+    try (PreparedStatement deleteBids = connection.prepareStatement("delete from bids where auction_id = ?");
+         PreparedStatement deleteAuction = connection.prepareStatement("delete from auctions where id = ?")) {
+     deleteBids.setString(1, auctionId.toString());
+     deleteAuction.setString(1, auctionId.toString());
+     deleteBids.executeUpdate();
+     deleteAuction.executeUpdate();
     connection.commit();
    } catch (SQLException exception) {
     connection.rollback();
@@ -149,14 +144,11 @@ public final class AuctionDao {
  }
 
  private void deleteChildren(Connection connection, UUID auctionId) throws SQLException {
-  try (PreparedStatement deleteBids = connection.prepareStatement("delete from bids where auction_id = ?");
-       PreparedStatement deleteAutoBids = connection.prepareStatement("delete from auto_bids where auction_id = ?")) {
-   deleteBids.setString(1, auctionId.toString());
-   deleteAutoBids.setString(1, auctionId.toString());
-   deleteBids.executeUpdate();
-   deleteAutoBids.executeUpdate();
+   try (PreparedStatement deleteBids = connection.prepareStatement("delete from bids where auction_id = ?")) {
+    deleteBids.setString(1, auctionId.toString());
+    deleteBids.executeUpdate();
+   }
   }
- }
 
  private void writeBids(Connection connection, Auction auction) throws SQLException {
   try (PreparedStatement statement = connection.prepareStatement("""
@@ -173,29 +165,6 @@ public final class AuctionDao {
     statement.setString(7, bid.getSource().name());
     statement.setTimestamp(8, Timestamp.valueOf(bid.getCreatedAt()));
     statement.setTimestamp(9, Timestamp.valueOf(bid.getUpdatedAt()));
-    statement.addBatch();
-   }
-   statement.executeBatch();
-  }
- }
-
- private void writeAutoBids(Connection connection, Auction auction) throws SQLException {
-  try (PreparedStatement statement = connection.prepareStatement("""
-                insert into auto_bids (
-                    id, auction_id, bidder_id, bidder_name, max_bid, increment_amount, registered_at, active, created_at, updated_at
-                ) values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-                """)) {
-   for (AutoBidConfig config : auction.getAutoBidConfigs()) {
-    statement.setString(1, config.getId().toString());
-    statement.setString(2, auction.getId().toString());
-    statement.setString(3, config.getBidderId().toString());
-    statement.setString(4, config.getBidderName());
-    statement.setBigDecimal(5, config.getMaxBid());
-    statement.setBigDecimal(6, config.getIncrement());
-    statement.setTimestamp(7, Timestamp.valueOf(config.getRegisteredAt()));
-    statement.setBoolean(8, config.isActive());
-    statement.setTimestamp(9, Timestamp.valueOf(config.getCreatedAt()));
-    statement.setTimestamp(10, Timestamp.valueOf(config.getUpdatedAt()));
     statement.addBatch();
    }
    statement.executeBatch();
@@ -234,8 +203,7 @@ public final class AuctionDao {
           resultSet.getTimestamp("start_time").toLocalDateTime(),
           resultSet.getTimestamp("end_time").toLocalDateTime(),
           resultSet.getInt("extension_count"),
-          loadBids(connection, auctionId),
-          loadAutoBids(connection, auctionId)
+          loadBids(connection, auctionId)
   );
  }
 
@@ -257,40 +225,18 @@ public final class AuctionDao {
             resultSet.getString("bidder_name"),
             resultSet.getBigDecimal("amount"),
             resultSet.getTimestamp("bid_time").toLocalDateTime(),
-            BidSource.valueOf(resultSet.getString("source"))
-    ));
+            bidSourceOf(resultSet.getString("source"))
+     ));
+    }
+    return bids;
    }
-   return bids;
   }
- }
-
- private List<AutoBidConfig> loadAutoBids(Connection connection, UUID auctionId) throws SQLException {
-  try (PreparedStatement statement = connection.prepareStatement("""
-                select * from auto_bids where auction_id = ? order by registered_at
-                """)) {
-   statement.setString(1, auctionId.toString());
-   ResultSet resultSet = statement.executeQuery();
-   List<AutoBidConfig> configs = new ArrayList<>();
-   while (resultSet.next()) {
-    LocalDateTime createdAt = resultSet.getTimestamp("created_at").toLocalDateTime();
-    configs.add(new AutoBidConfig(
-            UUID.fromString(resultSet.getString("id")),
-            createdAt,
-            resultSet.getTimestamp("updated_at").toLocalDateTime(),
-            auctionId,
-            UUID.fromString(resultSet.getString("bidder_id")),
-            resultSet.getString("bidder_name"),
-            resultSet.getBigDecimal("max_bid"),
-            resultSet.getBigDecimal("increment_amount"),
-            resultSet.getTimestamp("registered_at").toLocalDateTime(),
-            resultSet.getBoolean("active")
-    ));
-   }
-   return configs;
-  }
- }
 
  private UUID uuidOrNull(String value) {
   return value == null ? null : UUID.fromString(value);
+ }
+
+ private BidSource bidSourceOf(String value) {
+  return "AUTO".equalsIgnoreCase(value) ? BidSource.MANUAL : BidSource.valueOf(value);
  }
 }

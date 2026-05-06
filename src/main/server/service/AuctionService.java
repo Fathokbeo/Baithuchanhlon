@@ -92,7 +92,6 @@ public final class AuctionService {
                     request.startTime(),
                     request.endTime(),
                     0,
-                    new ArrayList<>(),
                     new ArrayList<>()
             );
             auction.refreshLifecycle(now);
@@ -147,19 +146,6 @@ public final class AuctionService {
         lock.lock();
         try {
             rulesEngine.placeManualBid(auction, bidder, amount, now);
-            auctionDao.saveSnapshot(auction);
-            return auction;
-        } finally {
-            lock.unlock();
-        }
-    }
-
-    public Auction configureAutoBid(User bidder, UUID auctionId, BigDecimal maxBid, BigDecimal increment, LocalDateTime now) {
-        Auction auction = getAuction(auctionId);
-        Lock lock = lockOf(auctionId);
-        lock.lock();
-        try {
-            rulesEngine.configureAutoBid(auction, bidder, maxBid, increment, now);
             auctionDao.saveSnapshot(auction);
             return auction;
         } finally {

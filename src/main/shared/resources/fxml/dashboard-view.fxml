@@ -1,9 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <?import javafx.geometry.Insets?>
-<?import javafx.scene.chart.CategoryAxis?>
-<?import javafx.scene.chart.LineChart?>
-<?import javafx.scene.chart.NumberAxis?>
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.Tab?>
@@ -76,54 +73,24 @@
                                 <Label fx:id="detailItemInfoLabel" text="-" GridPane.columnIndex="1" GridPane.rowIndex="3"/>
                                 <Label fx:id="detailExtensionLabel" text="Gia han: 0 lan" GridPane.columnIndex="3" GridPane.rowIndex="3"/>
                             </GridPane>
-                            <SplitPane dividerPositions="0.46">
-                                <items>
-                                    <VBox spacing="12.0" styleClass="panel-card">
-                                        <padding>
-                                            <Insets top="16.0" right="16.0" bottom="16.0" left="16.0"/>
-                                        </padding>
-                                        <Label text="Mô tả" styleClass="section-title"/>
-                                        <TextArea fx:id="descriptionArea" prefHeight="160.0" wrapText="true" VBox.vgrow="NEVER"/>
-                                        <Label text="Lịch sử bid" styleClass="section-title"/>
-                                        <TableView fx:id="bidHistoryTable" VBox.vgrow="ALWAYS">
-                                            <columns>
-                                                <TableColumn fx:id="bidBidderColumn" prefWidth="120.0" text="Bidder"/>
-                                                <TableColumn fx:id="bidAmountColumn" prefWidth="110.0" text="Giá"/>
-                                                <TableColumn fx:id="bidTimeColumn" prefWidth="165.0" text="Thời gian"/>
-                                                <TableColumn fx:id="bidSourceColumn" prefWidth="90.0" text="Nguồn"/>
-                                            </columns>
-                                        </TableView>
-                                    </VBox>
-                                    <VBox spacing="12.0" styleClass="panel-card">
-                                        <padding>
-                                            <Insets top="16.0" right="16.0" bottom="16.0" left="16.0"/>
-                                        </padding>
-                                        <Label text="Biểu đồ giá realtime" styleClass="section-title"/>
-                                        <LineChart fx:id="priceChart" createSymbols="true" legendVisible="false" VBox.vgrow="ALWAYS">
-                                            <xAxis>
-                                                <CategoryAxis/>
-                                            </xAxis>
-                                            <yAxis>
-                                                <NumberAxis/>
-                                            </yAxis>
-                                        </LineChart>
-                                        <Label text="Cấu hình auto-bid" styleClass="section-title"/>
-                                        <TableView fx:id="autoBidTable" prefHeight="180.0">
-                                            <columns>
-                                                <TableColumn fx:id="autoBidderColumn" prefWidth="160.0" text="Bidder"/>
-                                                <TableColumn fx:id="autoMaxColumn" prefWidth="120.0" text="maxBid"/>
-                                                <TableColumn fx:id="autoIncrementColumn" prefWidth="120.0" text="Increment"/>
-                                            </columns>
-                                        </TableView>
-                                    </VBox>
-                                </items>
-                            </SplitPane>
+                            <VBox spacing="12.0" styleClass="panel-card" VBox.vgrow="ALWAYS">
+                                <padding>
+                                    <Insets top="16.0" right="16.0" bottom="16.0" left="16.0"/>
+                                </padding>
+                                <Label text="Mô tả" styleClass="section-title"/>
+                                <TextArea fx:id="descriptionArea" prefHeight="160.0" wrapText="true" VBox.vgrow="NEVER"/>
+                                <Label text="Lịch sử bid" styleClass="section-title"/>
+                                <TableView fx:id="bidHistoryTable" VBox.vgrow="ALWAYS">
+                                    <columns>
+                                        <TableColumn fx:id="bidBidderColumn" prefWidth="160.0" text="Bidder"/>
+                                        <TableColumn fx:id="bidAmountColumn" prefWidth="140.0" text="Giá"/>
+                                        <TableColumn fx:id="bidTimeColumn" prefWidth="190.0" text="Thời gian"/>
+                                    </columns>
+                                </TableView>
+                            </VBox>
                             <HBox alignment="CENTER_LEFT" spacing="12.0" styleClass="bid-bar">
                                 <TextField fx:id="bidAmountField" promptText="Giá muốn đặt"/>
                                 <Button fx:id="placeBidButton" text="Đặt giá" onAction="#handlePlaceBid" styleClass="primary-button"/>
-                                <TextField fx:id="autoMaxBidField" promptText="maxBid"/>
-                                <TextField fx:id="autoIncrementField" promptText="increment"/>
-                                <Button fx:id="configureAutoBidButton" text="Thiết lập auto-bid" onAction="#handleConfigureAutoBid"/>
                             </HBox>
                         </VBox>
                     </content>
