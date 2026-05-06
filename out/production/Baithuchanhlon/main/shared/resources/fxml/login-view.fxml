@@ -55,6 +55,7 @@
                                 <TextField fx:id="registerDisplayNameField" promptText="Tên hiển thị"/>
                                 <TextField fx:id="registerUsernameField" promptText="Tên đăng nhập"/>
                                 <PasswordField fx:id="registerPasswordField" promptText="Mật khẩu"/>
+                                <PasswordField fx:id="registerPasswordConfirmField" promptText="Xác nhận mật khẩu" />
                                 <ComboBox fx:id="roleComboBox"/>
                                 <Button fx:id="registerButton" onAction="#handleRegister" text="Đăng ký" styleClass="primary-button"/>
                             </VBox>
