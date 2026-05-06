@@ -1,9 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <?import javafx.geometry.Insets?>
-<?import javafx.scene.chart.CategoryAxis?>
-<?import javafx.scene.chart.LineChart?>
-<?import javafx.scene.chart.NumberAxis?>
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.Tab?>
@@ -98,17 +95,8 @@
                                         <padding>
                                             <Insets top="16.0" right="16.0" bottom="16.0" left="16.0"/>
                                         </padding>
-                                        <Label text="Biểu đồ giá realtime" styleClass="section-title"/>
-                                        <LineChart fx:id="priceChart" createSymbols="true" legendVisible="false" VBox.vgrow="ALWAYS">
-                                            <xAxis>
-                                                <CategoryAxis/>
-                                            </xAxis>
-                                            <yAxis>
-                                                <NumberAxis/>
-                                            </yAxis>
-                                        </LineChart>
                                         <Label text="Cấu hình auto-bid" styleClass="section-title"/>
-                                        <TableView fx:id="autoBidTable" prefHeight="180.0">
+                                        <TableView fx:id="autoBidTable" VBox.vgrow="ALWAYS">
                                             <columns>
                                                 <TableColumn fx:id="autoBidderColumn" prefWidth="160.0" text="Bidder"/>
                                                 <TableColumn fx:id="autoMaxColumn" prefWidth="120.0" text="maxBid"/>
