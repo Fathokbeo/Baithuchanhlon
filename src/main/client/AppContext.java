@@ -31,7 +31,7 @@ public final class AppContext {
 
     public static void initialize(Stage stage) {
         primaryStage = stage;
-        primaryStage.setTitle("Auction App AI");
+        primaryStage.setTitle("Auction App");
         connection = new AuctionClientConnection("127.0.0.1", DEFAULT_SERVER_PORT);
         connection.connectWithRetry();
         clientSessionService = new ClientSessionService(connection);
