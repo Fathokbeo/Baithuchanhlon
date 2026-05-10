@@ -45,10 +45,17 @@ import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.CompletionException;
 import java.util.function.Consumer;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
+import javafx.stage.FileChooser;
+
+import java.io.File;
 
 public final class DashboardController {
     private static final DateTimeFormatter TIME_FORMAT = DateTimeFormatter.ofPattern("HH:mm:ss");
 
+    @FXML
+    private ImageView itemImageView;
     @FXML
     private TabPane workspaceTabs;
     @FXML
@@ -376,9 +383,15 @@ public final class DashboardController {
         bidHistoryTable.setItems(FXCollections.observableArrayList(
                 auction.bidHistory() == null ? java.util.List.of() : auction.bidHistory()
         ));
+        if (auction.imagePath() == null || auction.imagePath().isBlank()) {
+            itemImageView.setImage(null);
+        } else {
+            itemImageView.setImage(new Image(new File(auction.imagePath()).toURI().toString()));
+        }
     }
 
     private void clearDetail() {
+        itemImageView.setImage(null);
         selectedAuctionId = null;
         detailTitleLabel.setText("Chua chon phien dau gia");
         detailStatusLabel.setText("-");
@@ -447,7 +460,22 @@ public final class DashboardController {
         TextField startTimeField = new TextField("20:00:00");
         DatePicker endDatePicker = new DatePicker(LocalDate.now().plusDays(1));
         TextField endTimeField = new TextField("20:30:00");
+        TextField imagePathField = new TextField();
+        imagePathField.setEditable(false);
 
+        Button chooseImageButton = new Button("Chọn ảnh");
+        chooseImageButton.setOnAction(event -> {
+            FileChooser chooser = new FileChooser();
+            chooser.setTitle("Chọn ảnh sản phẩm");
+            chooser.getExtensionFilters().add(
+                    new FileChooser.ExtensionFilter("Ảnh", "*.png", "*.jpg", "*.jpeg", "*.webp")
+            );
+
+            File file = chooser.showOpenDialog(dialog.getDialogPane().getScene().getWindow());
+            if (file != null) {
+                imagePathField.setText(file.getAbsolutePath());
+            }
+        });
         typeComboBox.setConverter(new StringConverter<>() {
             @Override
             public String toString(ItemType object) {
@@ -466,6 +494,7 @@ public final class DashboardController {
             nameField.setText(auction.itemName());
             priceField.setText(auction.startingPrice().stripTrailingZeros().toPlainString());
             descriptionField.setText(auction.description());
+            imagePathField.setText(auction.imagePath() == null ? "" : auction.imagePath());
             specialField.setText(auction.itemInfo().replaceFirst("^[^|]+\\s\\|\\s", ""));
             startDatePicker.setValue(auction.startTime().toLocalDate());
             startTimeField.setText(auction.startTime().toLocalTime().format(TIME_FORMAT));
@@ -494,8 +523,12 @@ public final class DashboardController {
         gridPane.add(endTimeField, 1, 6);
         gridPane.add(new Label("Thong so them"), 0, 7);
         gridPane.add(specialField, 1, 7);
-        gridPane.add(new Label("Mo ta"), 0, 8);
-        gridPane.add(descriptionField, 1, 8);
+        gridPane.add(new Label("Ảnh"), 0, 8);
+        gridPane.add(imagePathField, 1, 8);
+        gridPane.add(chooseImageButton, 2, 8);
+
+        gridPane.add(new Label("Mô tả"), 0, 9);
+        gridPane.add(descriptionField, 1, 9);
         dialog.getDialogPane().setContent(gridPane);
 
         dialog.setResultConverter(buttonType -> {
@@ -509,6 +542,7 @@ public final class DashboardController {
                     typeComboBox.getValue(),
                     nameField.getText().trim(),
                     descriptionField.getText().trim(),
+                    imagePathField.getText().trim(),
                     parseAmount(priceField.getText()),
                     startTime,
                     endTime,

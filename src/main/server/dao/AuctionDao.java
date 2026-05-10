@@ -114,10 +114,10 @@ public final class AuctionDao {
  private void writeAuction(Connection connection, Auction auction) throws SQLException {
   try (PreparedStatement statement = connection.prepareStatement("""
                 merge into auctions (
-                    id, seller_id, item_id, item_type, item_name, item_description, starting_price,
+                    id, seller_id, item_id, item_type, item_name, item_description, item_image_path, starting_price,
                     current_price, special_field, leading_bidder_id, leading_bidder_name, winner_bidder_id,
                     winner_bidder_name, status, start_time, end_time, extension_count, created_at, updated_at
-                ) values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                ) values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                 """)) {
    Item item = auction.getItem();
    statement.setString(1, auction.getId().toString());
@@ -126,19 +126,20 @@ public final class AuctionDao {
    statement.setString(4, item.getType().name());
    statement.setString(5, item.getName());
    statement.setString(6, item.getDescription());
-   statement.setBigDecimal(7, item.getStartingPrice());
-   statement.setBigDecimal(8, auction.getCurrentPrice());
-   statement.setString(9, item.getSpecialField());
-   statement.setString(10, auction.getLeadingBidderId() == null ? null : auction.getLeadingBidderId().toString());
-   statement.setString(11, auction.getLeadingBidderName());
-   statement.setString(12, auction.getWinnerBidderId() == null ? null : auction.getWinnerBidderId().toString());
-   statement.setString(13, auction.getWinnerBidderName());
-   statement.setString(14, auction.getStatus().name());
-   statement.setTimestamp(15, Timestamp.valueOf(auction.getStartTime()));
-   statement.setTimestamp(16, Timestamp.valueOf(auction.getEndTime()));
-   statement.setInt(17, auction.getExtensionCount());
-   statement.setTimestamp(18, Timestamp.valueOf(auction.getCreatedAt()));
-   statement.setTimestamp(19, Timestamp.valueOf(auction.getUpdatedAt()));
+   statement.setString(7, item.getImagePath());
+   statement.setBigDecimal(8, item.getStartingPrice());
+   statement.setBigDecimal(9, auction.getCurrentPrice());
+   statement.setString(10, item.getSpecialField());
+   statement.setString(11, auction.getLeadingBidderId() == null ? null : auction.getLeadingBidderId().toString());
+   statement.setString(12, auction.getLeadingBidderName());
+   statement.setString(13, auction.getWinnerBidderId() == null ? null : auction.getWinnerBidderId().toString());
+   statement.setString(14, auction.getWinnerBidderName());
+   statement.setString(15, auction.getStatus().name());
+   statement.setTimestamp(16, Timestamp.valueOf(auction.getStartTime()));
+   statement.setTimestamp(17, Timestamp.valueOf(auction.getEndTime()));
+   statement.setInt(18, auction.getExtensionCount());
+   statement.setTimestamp(19, Timestamp.valueOf(auction.getCreatedAt()));
+   statement.setTimestamp(20, Timestamp.valueOf(auction.getUpdatedAt()));
    statement.executeUpdate();
   }
  }
@@ -185,6 +186,7 @@ public final class AuctionDao {
           sellerId,
           resultSet.getString("item_name"),
           resultSet.getString("item_description"),
+          resultSet.getString("item_image_path"),
           resultSet.getBigDecimal("starting_price"),
           resultSet.getString("special_field")
   );
