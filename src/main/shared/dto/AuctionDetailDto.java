@@ -13,6 +13,7 @@ public record AuctionDetailDto(
         String sellerName,
         String itemName,
         String description,
+        String imagePath,
         String itemInfo,
         ItemType itemType,
         BigDecimal startingPrice,

@@ -12,10 +12,11 @@ public final class Art extends Item {
             UUID sellerId,
             String name,
             String description,
+            String imagePath,
             BigDecimal startingPrice,
             String specialField
     ) {
-        super(id, createdAt, updatedAt, sellerId, name, description, startingPrice, specialField);
+        super(id, createdAt, updatedAt, sellerId, name, description, imagePath, startingPrice, specialField);
     }
 
     @Override

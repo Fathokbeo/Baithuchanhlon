@@ -15,6 +15,7 @@
 <?import javafx.scene.layout.Priority?>
 <?import javafx.scene.control.SplitPane?>
 <?import javafx.scene.layout.VBox?>
+<?import javafx.scene.image.ImageView?>
 
 <BorderPane prefHeight="860.0" prefWidth="1400.0" styleClass="dashboard-root" xmlns="http://javafx.com/javafx/21"
             xmlns:fx="http://javafx.com/fxml/1" fx:controller="main.client.controller.DashboardController">
@@ -78,6 +79,7 @@
                                     <Insets top="16.0" right="16.0" bottom="16.0" left="16.0"/>
                                 </padding>
                                 <Label text="Mô tả" styleClass="section-title"/>
+                                <ImageView fx:id="itemImageView" fitWidth="260.0" fitHeight="180.0" preserveRatio="true" smooth="true"/>
                                 <TextArea fx:id="descriptionArea" prefHeight="160.0" wrapText="true" VBox.vgrow="NEVER"/>
                                 <Label text="Lịch sử bid" styleClass="section-title"/>
                                 <TableView fx:id="bidHistoryTable" VBox.vgrow="ALWAYS">
