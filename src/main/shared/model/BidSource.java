@@ -1,5 +1,6 @@
 package main.shared.model;
 
 public enum BidSource {
-    MANUAL  
+    MANUAL,
+    AUTO
 }
