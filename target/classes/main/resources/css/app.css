@@ -87,11 +87,20 @@
 .password-field,
 .combo-box,
 .text-area,
-.date-picker {
+.date-picker,
+.description-scroll {
     -fx-background-radius: 12px;
     -fx-border-radius: 12px;
     -fx-border-color: rgba(31,54,50,0.12);
     -fx-background-color: rgba(255,255,255,0.88);
+}
+
+.description-scroll > .viewport {
+    -fx-background-color: transparent;
+}
+
+.description-flow {
+    -fx-padding: 10px;
 }
 
 .table-view {
