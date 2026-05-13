@@ -26,6 +26,7 @@ import javafx.scene.control.ButtonType;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.DatePicker;
 import javafx.scene.control.Dialog;
+import javafx.scene.control.Hyperlink;
 import javafx.scene.control.Label;
 import javafx.scene.control.Tab;
 import javafx.scene.control.TabPane;
@@ -34,9 +35,13 @@ import javafx.scene.control.TableView;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.GridPane;
+import javafx.scene.text.Text;
+import javafx.scene.text.TextFlow;
 import javafx.util.StringConverter;
 
+import java.awt.Desktop;
 import java.math.BigDecimal;
+import java.net.URI;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
@@ -45,10 +50,20 @@ import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.CompletionException;
 import java.util.function.Consumer;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
+import javafx.stage.FileChooser;
+
+import java.io.File;
 
 public final class DashboardController {
     private static final DateTimeFormatter TIME_FORMAT = DateTimeFormatter.ofPattern("HH:mm:ss");
+    private static final Pattern URL_PATTERN = Pattern.compile("(https?://\\S+|www\\.\\S+)");
 
+    @FXML
+    private ImageView itemImageView;
     @FXML
     private TabPane workspaceTabs;
     @FXML
@@ -86,7 +101,7 @@ public final class DashboardController {
     @FXML
     private Label detailExtensionLabel;
     @FXML
-    private TextArea descriptionArea;
+    private TextFlow descriptionFlow;
     @FXML
     private TableView<BidTransactionDto> bidHistoryTable;
     @FXML
@@ -294,7 +309,6 @@ public final class DashboardController {
     }
 
     private void setupDetailTables() {
-        descriptionArea.setEditable(false);
         bidBidderColumn.setCellValueFactory(data -> new SimpleStringProperty(data.getValue().bidderName()));
         bidAmountColumn.setCellValueFactory(data -> new SimpleStringProperty(MoneyUtils.display(data.getValue().amount())));
         bidTimeColumn.setCellValueFactory(data -> new SimpleStringProperty(TimeUtils.display(data.getValue().timestamp())));
@@ -372,13 +386,19 @@ public final class DashboardController {
         detailCurrentPriceLabel.setText(MoneyUtils.display(auction.currentPrice()));
         detailItemInfoLabel.setText(auction.itemInfo());
         detailExtensionLabel.setText("Gia han: " + auction.extensionCount() + " lan");
-        descriptionArea.setText(auction.description() == null ? "" : auction.description());
+        renderDescription(auction.description());
         bidHistoryTable.setItems(FXCollections.observableArrayList(
                 auction.bidHistory() == null ? java.util.List.of() : auction.bidHistory()
         ));
+        if (auction.imagePath() == null || auction.imagePath().isBlank()) {
+            itemImageView.setImage(null);
+        } else {
+            itemImageView.setImage(new Image(new File(auction.imagePath()).toURI().toString()));
+        }
     }
 
     private void clearDetail() {
+        itemImageView.setImage(null);
         selectedAuctionId = null;
         detailTitleLabel.setText("Chua chon phien dau gia");
         detailStatusLabel.setText("-");
@@ -388,8 +408,59 @@ public final class DashboardController {
         detailCurrentPriceLabel.setText("-");
         detailItemInfoLabel.setText("-");
         detailExtensionLabel.setText("Gia han: 0 lan");
-        descriptionArea.clear();
+        renderDescription("");
         bidHistoryTable.setItems(FXCollections.emptyObservableList());
+    }
+
+    private void renderDescription(String description) {
+        descriptionFlow.getChildren().clear();
+        String text = description == null ? "" : description;
+        Matcher matcher = URL_PATTERN.matcher(text);
+        int currentIndex = 0;
+
+        while (matcher.find()) {
+            if (matcher.start() > currentIndex) {
+                descriptionFlow.getChildren().add(new Text(text.substring(currentIndex, matcher.start())));
+            }
+
+            String rawUrl = matcher.group();
+            String linkText = trimTrailingPunctuation(rawUrl);
+            String punctuation = rawUrl.substring(linkText.length());
+            Hyperlink link = new Hyperlink(linkText);
+            link.setPadding(javafx.geometry.Insets.EMPTY);
+            link.setOnAction(event -> openLink(linkText));
+            descriptionFlow.getChildren().add(link);
+
+            if (!punctuation.isEmpty()) {
+                descriptionFlow.getChildren().add(new Text(punctuation));
+            }
+            currentIndex = matcher.end();
+        }
+
+        if (currentIndex < text.length()) {
+            descriptionFlow.getChildren().add(new Text(text.substring(currentIndex)));
+        }
+    }
+
+    private String trimTrailingPunctuation(String rawUrl) {
+        int endIndex = rawUrl.length();
+        while (endIndex > 0 && ".,;:!?)]}".indexOf(rawUrl.charAt(endIndex - 1)) >= 0) {
+            endIndex--;
+        }
+        return rawUrl.substring(0, endIndex);
+    }
+
+    private void openLink(String rawUrl) {
+        try {
+            if (!Desktop.isDesktopSupported() || !Desktop.getDesktop().isSupported(Desktop.Action.BROWSE)) {
+                AlertHelper.error("May nay khong ho tro mo link tu ung dung");
+                return;
+            }
+            String normalizedUrl = rawUrl.startsWith("www.") ? "https://" + rawUrl : rawUrl;
+            Desktop.getDesktop().browse(new URI(normalizedUrl));
+        } catch (Exception exception) {
+            AlertHelper.error("Khong mo duoc link: " + rawUrl);
+        }
     }
 
     private void handleAuctionEvent(AuctionEventDto event) {
@@ -447,7 +518,22 @@ public final class DashboardController {
         TextField startTimeField = new TextField("20:00:00");
         DatePicker endDatePicker = new DatePicker(LocalDate.now().plusDays(1));
         TextField endTimeField = new TextField("20:30:00");
+        TextField imagePathField = new TextField();
+        imagePathField.setEditable(false);
 
+        Button chooseImageButton = new Button("Chọn ảnh");
+        chooseImageButton.setOnAction(event -> {
+            FileChooser chooser = new FileChooser();
+            chooser.setTitle("Chọn ảnh sản phẩm");
+            chooser.getExtensionFilters().add(
+                    new FileChooser.ExtensionFilter("Ảnh", "*.png", "*.jpg", "*.jpeg", "*.webp")
+            );
+
+            File file = chooser.showOpenDialog(dialog.getDialogPane().getScene().getWindow());
+            if (file != null) {
+                imagePathField.setText(file.getAbsolutePath());
+            }
+        });
         typeComboBox.setConverter(new StringConverter<>() {
             @Override
             public String toString(ItemType object) {
@@ -466,6 +552,7 @@ public final class DashboardController {
             nameField.setText(auction.itemName());
             priceField.setText(auction.startingPrice().stripTrailingZeros().toPlainString());
             descriptionField.setText(auction.description());
+            imagePathField.setText(auction.imagePath() == null ? "" : auction.imagePath());
             specialField.setText(auction.itemInfo().replaceFirst("^[^|]+\\s\\|\\s", ""));
             startDatePicker.setValue(auction.startTime().toLocalDate());
             startTimeField.setText(auction.startTime().toLocalTime().format(TIME_FORMAT));
@@ -494,8 +581,12 @@ public final class DashboardController {
         gridPane.add(endTimeField, 1, 6);
         gridPane.add(new Label("Thong so them"), 0, 7);
         gridPane.add(specialField, 1, 7);
-        gridPane.add(new Label("Mo ta"), 0, 8);
-        gridPane.add(descriptionField, 1, 8);
+        gridPane.add(new Label("Ảnh"), 0, 8);
+        gridPane.add(imagePathField, 1, 8);
+        gridPane.add(chooseImageButton, 2, 8);
+
+        gridPane.add(new Label("Mô tả"), 0, 9);
+        gridPane.add(descriptionField, 1, 9);
         dialog.getDialogPane().setContent(gridPane);
 
         dialog.setResultConverter(buttonType -> {
@@ -509,6 +600,7 @@ public final class DashboardController {
                     typeComboBox.getValue(),
                     nameField.getText().trim(),
                     descriptionField.getText().trim(),
+                    imagePathField.getText().trim(),
                     parseAmount(priceField.getText()),
                     startTime,
                     endTime,

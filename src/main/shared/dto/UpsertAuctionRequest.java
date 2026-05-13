@@ -11,6 +11,7 @@ public record UpsertAuctionRequest(
         ItemType itemType,
         String name,
         String description,
+        String imagePath,
         BigDecimal startingPrice,
         LocalDateTime startTime,
         LocalDateTime endTime,

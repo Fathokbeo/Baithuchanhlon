@@ -74,6 +74,7 @@ public final class AuctionService {
                     seller.getId(),
                     request.name(),
                     request.description(),
+                    request.imagePath(),
                     MoneyUtils.normalize(request.startingPrice()),
                     request.specialField()
             );
@@ -112,6 +113,7 @@ public final class AuctionService {
         try {
             auction.getItem().setName(request.name(), now);
             auction.getItem().setDescription(request.description(), now);
+            auction.getItem().setImagePath(request.imagePath(), now);
             auction.getItem().setSpecialField(request.specialField(), now);
             auction.getItem().setStartingPrice(MoneyUtils.normalize(request.startingPrice()), now);
             auction.setStartTime(request.startTime(), now);

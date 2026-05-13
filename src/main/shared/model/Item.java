@@ -9,6 +9,7 @@ public abstract class Item extends Entity {
     private final UUID sellerId;
     private String name;
     private String description;
+    private String imagePath;
     private BigDecimal startingPrice;
     private String specialField;
 
@@ -19,6 +20,7 @@ public abstract class Item extends Entity {
             UUID sellerId,
             String name,
             String description,
+            String imagePath,
             BigDecimal startingPrice,
             String specialField
     ) {
@@ -26,6 +28,7 @@ public abstract class Item extends Entity {
         this.sellerId = Objects.requireNonNull(sellerId, "sellerId");
         this.name = User.requireText(name, "name");
         this.description = User.requireText(description, "description");
+        this.imagePath = cleanOptionalText(imagePath);
         this.startingPrice = Objects.requireNonNull(startingPrice, "startingPrice");
         this.specialField = User.requireText(specialField, "specialField");
     }
@@ -56,6 +59,15 @@ public abstract class Item extends Entity {
         touch(timestamp);
     }
 
+    public String getImagePath() {
+        return imagePath;
+    }
+
+    public void setImagePath(String imagePath, LocalDateTime timestamp) {
+        this.imagePath = cleanOptionalText(imagePath);
+        touch(timestamp);
+    }
+
     public BigDecimal getStartingPrice() {
         return startingPrice;
     }
@@ -72,5 +84,9 @@ public abstract class Item extends Entity {
     public void setSpecialField(String specialField, LocalDateTime timestamp) {
         this.specialField = User.requireText(specialField, "specialField");
         touch(timestamp);
+    }
+
+    private static String cleanOptionalText(String value) {
+        return value == null || value.isBlank() ? null : value.trim();
     }
 }
