@@ -1,6 +1,5 @@
 package main.server.dao;
 
-
 import main.shared.model.Admin;
 import main.shared.model.Bidder;
 import main.shared.model.Role;
