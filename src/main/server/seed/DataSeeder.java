@@ -56,6 +56,7 @@ public final class DataSeeder {
                 seller.getId(),
                 "MacBook Pro M4",
                 "Laptop phuc vu developer, RAM 24GB, SSD 1TB.",
+                null,
                 new BigDecimal("1500.00"),
                 "Apple | Bao hanh 12 thang"
         );
@@ -99,6 +100,7 @@ public final class DataSeeder {
                 seller.getId(),
                 "Tranh Son Dau Pho Co",
                 "Tac pham son dau chu de pho co Ha Noi, khung go lim.",
+                null,
                 new BigDecimal("800.00"),
                 "Hoa si noi dia | Canvas 80x120"
         );
@@ -131,6 +133,7 @@ public final class DataSeeder {
                 seller.getId(),
                 "Honda SH 150i 2024",
                 "Xe moi 95%, odo 3.500 km, chinh chu.",
+                null,
                 new BigDecimal("3500.00"),
                 "SH 150i | 3.500km"
         );

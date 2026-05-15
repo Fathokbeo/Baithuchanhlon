@@ -46,6 +46,7 @@ public final class AuctionViewMapper {
                 sellerName,
                 auction.getItem().getName(),
                 auction.getItem().getDescription(),
+                auction.getItem().getImagePath(),
                 auction.getItem().printInfo(),
                 auction.getItem().getType(),
                 auction.getItem().getStartingPrice(),

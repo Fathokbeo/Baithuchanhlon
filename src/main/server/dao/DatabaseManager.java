@@ -44,6 +44,7 @@ public final class DatabaseManager {
                         item_type varchar(20) not null,
                         item_name varchar(150) not null,
                         item_description clob not null,
+                        item_image_path varchar(500),
                         starting_price decimal(19,2) not null,
                         current_price decimal(19,2) not null,
                         special_field varchar(255) not null,
@@ -59,6 +60,11 @@ public final class DatabaseManager {
                         updated_at timestamp not null
                     )
                     """);
+            try {
+                statement.execute("alter table auctions add column item_image_path varchar(500)");
+            } catch (SQLException ignored) {
+                // Column already exists.
+            }
             statement.execute("""
                     create table if not exists bids (
                         id varchar(36) primary key,

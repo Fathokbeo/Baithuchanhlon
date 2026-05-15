@@ -18,15 +18,16 @@ public final class ItemFactory {
             UUID sellerId,
             String name,
             String description,
+            String imagePath,
             BigDecimal startingPrice,
             String specialField
     ){
         return switch (type){
-            case ELECTRONICS -> new Electronics(id,createAt,updateAt, sellerId, name, description, startingPrice, specialField);
+            case ELECTRONICS -> new Electronics(id,createAt,updateAt, sellerId, name, description, imagePath, startingPrice, specialField);
 
-            case ART -> new Art(id,createAt,updateAt, sellerId, name, description, startingPrice, specialField);
+            case ART -> new Art(id,createAt,updateAt, sellerId, name, description, imagePath, startingPrice, specialField);
 
-            case VEHICLE -> new Vehicle(id,createAt,updateAt, sellerId, name, description, startingPrice, specialField);
+            case VEHICLE -> new Vehicle(id,createAt,updateAt, sellerId, name, description, imagePath, startingPrice, specialField);
         };
     }
 }
