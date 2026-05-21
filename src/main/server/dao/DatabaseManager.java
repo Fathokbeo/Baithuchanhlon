@@ -78,6 +78,20 @@ public final class DatabaseManager {
                         updated_at timestamp not null
                     )
                     """);
+            statement.execute("""
+                    create table if not exists auto_bids (
+                        id varchar(36) primary key,
+                        auction_id varchar(36) not null,
+                        bidder_id varchar(36) not null,
+                        bidder_name varchar(120) not null,
+                        max_bid decimal(19,2) not null,
+                        increment_amount decimal(19,2) not null,
+                        registered_at timestamp not null,
+                        active boolean not null,
+                        created_at timestamp not null,
+                        updated_at timestamp not null
+                    )
+                    """);
         } catch (SQLException exception) {
             throw new IllegalStateException("Cannot initialize database schema", exception);
         }
