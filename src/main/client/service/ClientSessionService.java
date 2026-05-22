@@ -46,6 +46,10 @@ public final class ClientSessionService {
         return connection.sendRequest(MessageType.PLACE_BID, request, AuctionDetailResponse.class);
     }
 
+    public CompletableFuture<AuctionDetailResponse> configureAutoBid(ConfigureAutoBidRequest request) {
+        return connection.sendRequest(MessageType.CONFIGURE_AUTO_BID, request, AuctionDetailResponse.class);
+    }
+
     public CompletableFuture<AuctionDetailResponse> updateAuctionStatus(UpdateAuctionStatusRequest request) {
         return connection.sendRequest(MessageType.UPDATE_AUCTION_STATUS, request, AuctionDetailResponse.class);
     }

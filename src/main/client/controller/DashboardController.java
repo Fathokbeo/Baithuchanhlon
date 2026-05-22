@@ -5,6 +5,8 @@ import main.shared.dto.AuctionDetailDto;
 import main.shared.dto.AuctionDetailResponse;
 import main.shared.dto.AuctionEventDto;
 import main.shared.dto.AuctionSummaryDto;
+import main.shared.dto.AutoBidDto;
+import main.shared.dto.ConfigureAutoBidRequest;
 import main.shared.dto.BidTransactionDto;
 import main.shared.dto.PlaceBidRequest;
 import main.shared.dto.SessionUserDto;
@@ -111,9 +113,23 @@ public final class DashboardController {
     @FXML
     private TableColumn<BidTransactionDto, String> bidTimeColumn;
     @FXML
+    private TableView<AutoBidDto> autoBidTable;
+    @FXML
+    private TableColumn<AutoBidDto, String> autoBidderColumn;
+    @FXML
+    private TableColumn<AutoBidDto, String> autoMaxColumn;
+    @FXML
+    private TableColumn<AutoBidDto, String> autoIncrementColumn;
+    @FXML
     private TextField bidAmountField;
     @FXML
+    private TextField autoMaxBidField;
+    @FXML
+    private TextField autoIncrementField;
+    @FXML
     private Button placeBidButton;
+    @FXML
+    private Button configureAutoBidButton;
     @FXML
     private TableView<AuctionSummaryDto> sellerAuctionTable;
     @FXML
@@ -229,6 +245,25 @@ public final class DashboardController {
     }
 
     @FXML
+    private void handleConfigureAutoBid() {
+        if (selectedAuctionId == null) {
+            AlertHelper.error("Hay chon mot phien dau gia");
+            return;
+        }
+        runAction(AppContext.service().configureAutoBid(new ConfigureAutoBidRequest(
+                        selectedAuctionId,
+                        parseAmount(autoMaxBidField.getText()),
+                        parseAmount(autoIncrementField.getText())
+                )),
+                response -> {
+                    renderAuctionDetail(response.auction());
+                    autoMaxBidField.clear();
+                    autoIncrementField.clear();
+                    AlertHelper.info("Cap nhat auto-bid thanh cong");
+                });
+    }
+
+    @FXML
     private void handleAddAuction() {
         showAuctionForm(null).ifPresent(request -> runAction(AppContext.service().saveAuction(request),
                 response -> {
@@ -297,7 +332,10 @@ public final class DashboardController {
         }
         boolean bidderControlsVisible = role == Role.BIDDER;
         placeBidButton.setDisable(!bidderControlsVisible);
+        configureAutoBidButton.setDisable(!bidderControlsVisible);
         bidAmountField.setDisable(!bidderControlsVisible);
+        autoMaxBidField.setDisable(!bidderControlsVisible);
+        autoIncrementField.setDisable(!bidderControlsVisible);
     }
 
     private void setupAuctionTable() {
@@ -312,6 +350,10 @@ public final class DashboardController {
         bidBidderColumn.setCellValueFactory(data -> new SimpleStringProperty(data.getValue().bidderName()));
         bidAmountColumn.setCellValueFactory(data -> new SimpleStringProperty(MoneyUtils.display(data.getValue().amount())));
         bidTimeColumn.setCellValueFactory(data -> new SimpleStringProperty(TimeUtils.display(data.getValue().timestamp())));
+
+        autoBidderColumn.setCellValueFactory(data -> new SimpleStringProperty(data.getValue().bidderName()));
+        autoMaxColumn.setCellValueFactory(data -> new SimpleStringProperty(MoneyUtils.display(data.getValue().maxBid())));
+        autoIncrementColumn.setCellValueFactory(data -> new SimpleStringProperty(MoneyUtils.display(data.getValue().increment())));
     }
 
     private void setupSellerTable() {
@@ -395,6 +437,7 @@ public final class DashboardController {
         } else {
             itemImageView.setImage(new Image(new File(auction.imagePath()).toURI().toString()));
         }
+        autoBidTable.setItems(FXCollections.observableArrayList(auction.autoBids()));
     }
 
     private void clearDetail() {
@@ -410,6 +453,7 @@ public final class DashboardController {
         detailExtensionLabel.setText("Gia han: 0 lan");
         renderDescription("");
         bidHistoryTable.setItems(FXCollections.emptyObservableList());
+        autoBidTable.setItems(FXCollections.emptyObservableList());
     }
 
     private void renderDescription(String description) {
