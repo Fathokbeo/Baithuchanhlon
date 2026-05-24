@@ -105,9 +105,21 @@
                                     </columns>
                                 </TableView>
                             </VBox>
+                            <Label text="Cấu hình auto-bid" styleClass="section-title"/>
+                            <TableView fx:id="autoBidTable" prefHeight="180.0">
+                                <columns>
+                                    <TableColumn fx:id="autoBidderColumn" prefWidth="160.0" text="Bidder"/>
+                                    <TableColumn fx:id="autoMaxColumn" prefWidth="120.0" text="maxBid"/>
+                                    <TableColumn fx:id="autoIncrementColumn" prefWidth="120.0" text="Increment"/>
+                                </columns>
+                            </TableView>
+
                             <HBox alignment="CENTER_LEFT" spacing="12.0" styleClass="bid-bar">
                                 <TextField fx:id="bidAmountField" promptText="Giá muốn đặt" />
                                 <Button fx:id="placeBidButton" onAction="#handlePlaceBid" styleClass="primary-button" text="Đặt giá" />
+                                <TextField fx:id="autoMaxBidField" promptText="maxBid"/>
+                                <TextField fx:id="autoIncrementField" promptText="increment"/>
+                                <Button fx:id="configureAutoBidButton" text="Thiết lập auto-bid" onAction="#handleConfigureAutoBid"/>
                             </HBox>
                         </VBox>
                     </content>

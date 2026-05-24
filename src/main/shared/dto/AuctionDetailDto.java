@@ -25,6 +25,7 @@ public record AuctionDetailDto(
         String winnerBidderName,
         int extensionCount,
         List<BidTransactionDto> bidHistory,
-        List<PricePointDto> priceHistory
+        List<PricePointDto> priceHistory,
+        List<AutoBidDto> autoBids
 ) {
 }
