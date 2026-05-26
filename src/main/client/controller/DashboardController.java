@@ -22,6 +22,8 @@ import javafx.application.Platform;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
 import javafx.fxml.FXML;
+import javafx.scene.chart.LineChart;
+import javafx.scene.chart.XYChart;
 import javafx.scene.control.Button;
 import javafx.scene.control.ButtonBar;
 import javafx.scene.control.ButtonType;
@@ -120,6 +122,8 @@ public final class DashboardController {
     private TableColumn<AutoBidDto, String> autoMaxColumn;
     @FXML
     private TableColumn<AutoBidDto, String> autoIncrementColumn;
+    @FXML
+    private LineChart<String, Number> priceChart;
     @FXML
     private TextField bidAmountField;
     @FXML
@@ -438,6 +442,20 @@ public final class DashboardController {
             itemImageView.setImage(new Image(new File(auction.imagePath()).toURI().toString()));
         }
         autoBidTable.setItems(FXCollections.observableArrayList(auction.autoBids()));
+       priceChart.setAnimated(false); 
+
+XYChart.Series<String, Number> series = new XYChart.Series<>();
+series.setName("Biến động giá");
+
+// 2. Thêm Null Check để tránh văng Exception ngầm
+if (auction.priceHistory() != null) {
+    auction.priceHistory().forEach(point -> series.getData().add(
+            new XYChart.Data<>(TimeUtils.chartLabel(point.timestamp()), point.amount())
+    ));
+}
+
+// 3. Set dữ liệu an toàn
+priceChart.getData().setAll(series);
     }
 
     private void clearDetail() {
@@ -454,6 +472,7 @@ public final class DashboardController {
         renderDescription("");
         bidHistoryTable.setItems(FXCollections.emptyObservableList());
         autoBidTable.setItems(FXCollections.emptyObservableList());
+        //priceChart.getData().clear();
     }
 
     private void renderDescription(String description) {
