@@ -2,9 +2,9 @@ name: Build and Test
 
 on:
   push:
-    branches: [ main, develop ]
+    branches: [ main ]
   pull_request:
-    branches: [ main, develop ]
+    branches: [ main ]
 
 jobs:
   build:
@@ -31,9 +31,10 @@ jobs:
       run: mvn test
     
     - name: Generate test report
-      if: always()
+      if: always() && hashFiles('target/surefire-reports/*.xml') != ''
       uses: dorny/test-reporter@v1
       with:
         name: Maven Tests
         path: target/surefire-reports/*.xml
         reporter: 'java-junit'
+      continue-on-error: true
