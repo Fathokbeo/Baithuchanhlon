@@ -32,10 +32,16 @@ public final class DatabaseManager {
                         password_hash varchar(255) not null,
                         display_name varchar(120) not null,
                         role varchar(20) not null,
+                        balance decimal(19,2) not null default 0,
                         created_at timestamp not null,
                         updated_at timestamp not null
                     )
                     """);
+            try {
+                statement.execute("alter table users add column balance decimal(19,2) not null default 0");
+            } catch (SQLException ignored) {
+                // Column already exists.
+            }
             statement.execute("""
                     create table if not exists auctions (
                         id varchar(36) primary key,
