@@ -58,6 +58,10 @@ public final class AppContext {
         showScene("/fxml/dashboard-view.fxml", 1400, 860);
     }
 
+    public static void showUserInfoView() {
+        showScene("/fxml/user-info-view.fxml", 760, 600);
+    }
+
     public static void shutdown() {
         if (connection != null) {
             connection.close();

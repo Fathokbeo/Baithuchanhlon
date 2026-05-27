@@ -232,6 +232,12 @@ public final class DashboardController {
     }
 
     @FXML
+    private void handleUserInfo() {
+        AppContext.connection().removeAuctionListener(eventListener);
+        AppContext.showUserInfoView();
+    }
+
+    @FXML
     private void handleLogout() {
         AppContext.connection().removeAuctionListener(eventListener);
         AppContext.state().setCurrentUser(null);
