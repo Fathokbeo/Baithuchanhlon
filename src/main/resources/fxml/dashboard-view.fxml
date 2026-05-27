@@ -57,85 +57,99 @@
             <tabs>
                 <Tab text="Chi tiết phiên">
                     <content>
-                        <VBox spacing="16.0" styleClass="content-panel">
-                            <padding>
-                                <Insets bottom="18.0" left="12.0" right="24.0" top="18.0" />
-                            </padding>
-                            <GridPane hgap="18.0" vgap="12.0">
-                                <Label styleClass="label-heading" text="Sản phẩm" GridPane.columnIndex="0" GridPane.rowIndex="0" />
-                                <Label fx:id="detailTitleLabel" styleClass="value-heading" text="Chưa chọn phiên đấu giá" GridPane.columnIndex="1" GridPane.rowIndex="0" />
-                                <Label styleClass="label-heading" text="Trạng thái" GridPane.columnIndex="2" GridPane.rowIndex="0" />
-                                <Label fx:id="detailStatusLabel" text="-" GridPane.columnIndex="3" GridPane.rowIndex="0" />
-                                <Label styleClass="label-heading" text="Seller" GridPane.columnIndex="0" GridPane.rowIndex="1" />
-                                <Label fx:id="detailSellerLabel" text="-" GridPane.columnIndex="1" GridPane.rowIndex="1" />
-                                <Label styleClass="label-heading" text="Thời gian" GridPane.columnIndex="2" GridPane.rowIndex="1" />
-                                <Label fx:id="detailTimeLabel" text="-" GridPane.columnIndex="3" GridPane.rowIndex="1" />
-                                <Label styleClass="label-heading" text="Người dẫn đầu" GridPane.rowIndex="2" />
-                                <Label fx:id="detailLeadingLabel" text="-" GridPane.columnIndex="1" GridPane.rowIndex="2" />
-                                <Label styleClass="label-heading" text="Giá hiện tại" GridPane.columnIndex="2" GridPane.rowIndex="2" />
-                                <Label fx:id="detailCurrentPriceLabel" styleClass="value-heading" text="-" GridPane.columnIndex="3" GridPane.rowIndex="2" />
-                                <Label styleClass="label-heading" text="Phân loại" GridPane.rowIndex="3" />
-                                <Label fx:id="detailItemInfoLabel" text="-" GridPane.columnIndex="1" GridPane.rowIndex="3" />
-                                <Label fx:id="detailExtensionLabel" text="Gia han: 0 lan" GridPane.columnIndex="3" GridPane.rowIndex="3" />
-                        <columnConstraints>
-                           <ColumnConstraints />
-                           <ColumnConstraints />
-                           <ColumnConstraints />
-                           <ColumnConstraints />
-                        </columnConstraints>
-                        <rowConstraints>
-                           <RowConstraints />
-                           <RowConstraints />
-                           <RowConstraints />
-                           <RowConstraints />
-                        </rowConstraints>
-                            </GridPane>
-                            <ImageView fx:id="itemImageView" fitHeight="1.0" fitWidth="1.0" preserveRatio="true" />
-                            <VBox spacing="12.0" styleClass="panel-card" VBox.vgrow="ALWAYS">
-                                <padding>
-                                    <Insets bottom="16.0" left="16.0" right="16.0" top="16.0" />
-                                </padding>
-                                <Label styleClass="section-title" text="Mô tả" />
-                                <ScrollPane fitToWidth="true" prefHeight="120.0" styleClass="description-scroll" VBox.vgrow="NEVER">
+                        <BorderPane styleClass="content-panel">
+                            <top>
+                                <VBox spacing="10.0">
+                                    <padding>
+                                        <Insets bottom="10.0" left="12.0" right="24.0" top="18.0" />
+                                    </padding>
+                                    <GridPane hgap="18.0" vgap="12.0">
+                                        <Label styleClass="label-heading" text="Sản phẩm" GridPane.columnIndex="0" GridPane.rowIndex="0" />
+                                        <Label fx:id="detailTitleLabel" styleClass="value-heading" text="Chưa chọn phiên đấu giá" GridPane.columnIndex="1" GridPane.rowIndex="0" />
+                                        <Label styleClass="label-heading" text="Trạng thái" GridPane.columnIndex="2" GridPane.rowIndex="0" />
+                                        <Label fx:id="detailStatusLabel" text="-" GridPane.columnIndex="3" GridPane.rowIndex="0" />
+                                        <Label styleClass="label-heading" text="Seller" GridPane.columnIndex="0" GridPane.rowIndex="1" />
+                                        <Label fx:id="detailSellerLabel" text="-" GridPane.columnIndex="1" GridPane.rowIndex="1" />
+                                        <Label styleClass="label-heading" text="Thời gian" GridPane.columnIndex="2" GridPane.rowIndex="1" />
+                                        <Label fx:id="detailTimeLabel" text="-" GridPane.columnIndex="3" GridPane.rowIndex="1" />
+                                        <Label styleClass="label-heading" text="Người dẫn đầu" GridPane.rowIndex="2" />
+                                        <Label fx:id="detailLeadingLabel" text="-" GridPane.columnIndex="1" GridPane.rowIndex="2" />
+                                        <Label styleClass="label-heading" text="Giá hiện tại" GridPane.columnIndex="2" GridPane.rowIndex="2" />
+                                        <Label fx:id="detailCurrentPriceLabel" styleClass="value-heading" text="-" GridPane.columnIndex="3" GridPane.rowIndex="2" />
+                                        <Label styleClass="label-heading" text="Phân loại" GridPane.rowIndex="3" />
+                                        <Label fx:id="detailItemInfoLabel" text="-" GridPane.columnIndex="1" GridPane.rowIndex="3" />
+                                        <Label fx:id="detailExtensionLabel" text="Gia han: 0 lan" GridPane.columnIndex="3" GridPane.rowIndex="3" />
+                                        <columnConstraints>
+                                            <ColumnConstraints />
+                                            <ColumnConstraints />
+                                            <ColumnConstraints />
+                                            <ColumnConstraints />
+                                        </columnConstraints>
+                                        <rowConstraints>
+                                            <RowConstraints />
+                                            <RowConstraints />
+                                            <RowConstraints />
+                                            <RowConstraints />
+                                        </rowConstraints>
+                                    </GridPane>
+                                    <ImageView fx:id="itemImageView" fitHeight="1.0" fitWidth="1.0" preserveRatio="true" />
+                                </VBox>
+                            </top>
+                            <center>
+                                <ScrollPane fitToWidth="true" fitToHeight="false">
                                     <content>
-                                        <TextFlow fx:id="descriptionFlow" styleClass="description-flow" />
+                                        <VBox spacing="12.0" styleClass="panel-card">
+                                            <padding>
+                                                <Insets bottom="16.0" left="12.0" right="24.0" top="10.0" />
+                                            </padding>
+                                            <Label styleClass="section-title" text="Mô tả" />
+                                            <ScrollPane fitToWidth="true" prefHeight="100.0" styleClass="description-scroll">
+                                                <content>
+                                                    <TextFlow fx:id="descriptionFlow" styleClass="description-flow" />
+                                                </content>
+                                            </ScrollPane>
+                                            <Label styleClass="section-title" text="Lịch sử bid" />
+                                            <TableView fx:id="bidHistoryTable" prefHeight="180.0">
+                                                <columns>
+                                                    <TableColumn fx:id="bidBidderColumn" prefWidth="160.0" text="Bidder" />
+                                                    <TableColumn fx:id="bidAmountColumn" prefWidth="140.0" text="Giá" />
+                                                    <TableColumn fx:id="bidTimeColumn" prefWidth="190.0" text="Thời gian" />
+                                                </columns>
+                                            </TableView>
+                                            <Label styleClass="section-title" text="Biểu đồ giá realtime" />
+                                            <LineChart fx:id="priceChart" createSymbols="true" legendVisible="false" prefHeight="220.0">
+                                                <xAxis>
+                                                    <CategoryAxis />
+                                                </xAxis>
+                                                <yAxis>
+                                                    <NumberAxis />
+                                                </yAxis>
+                                            </LineChart>
+                                            <Label styleClass="section-title" text="Cấu hình auto-bid" />
+                                            <TableView fx:id="autoBidTable" prefHeight="160.0">
+                                                <columns>
+                                                    <TableColumn fx:id="autoBidderColumn" prefWidth="160.0" text="Bidder" />
+                                                    <TableColumn fx:id="autoMaxColumn" prefWidth="120.0" text="maxBid" />
+                                                    <TableColumn fx:id="autoIncrementColumn" prefWidth="120.0" text="Increment" />
+                                                </columns>
+                                            </TableView>
+                                        </VBox>
                                     </content>
                                 </ScrollPane>
-                                <Label styleClass="section-title" text="Lịch sử bid" />
-                                <TableView fx:id="bidHistoryTable" VBox.vgrow="ALWAYS">
-                                    <columns>
-                                        <TableColumn fx:id="bidBidderColumn" prefWidth="160.0" text="Bidder" />
-                                        <TableColumn fx:id="bidAmountColumn" prefWidth="140.0" text="Giá" />
-                                        <TableColumn fx:id="bidTimeColumn" prefWidth="190.0" text="Thời gian" />
-                                    </columns>
-                                </TableView>
-                            </VBox>
-                            <Label styleClass="section-title" text="Biểu đồ giá realtime" />
-                            <LineChart fx:id="priceChart" createSymbols="true" legendVisible="false" prefHeight="220.0" VBox.vgrow="ALWAYS">
-                                <xAxis>
-                                    <CategoryAxis />
-                                </xAxis>
-                                <yAxis>
-                                    <NumberAxis />
-                                </yAxis>
-                            </LineChart>
-                            <Label styleClass="section-title" text="Cấu hình auto-bid" />
-                            <TableView fx:id="autoBidTable" prefHeight="180.0">
-                                <columns>
-                                    <TableColumn fx:id="autoBidderColumn" prefWidth="160.0" text="Bidder" />
-                                    <TableColumn fx:id="autoMaxColumn" prefWidth="120.0" text="maxBid" />
-                                    <TableColumn fx:id="autoIncrementColumn" prefWidth="120.0" text="Increment" />
-                                </columns>
-                            </TableView>
-
-                            <HBox alignment="CENTER_LEFT" spacing="12.0" styleClass="bid-bar">
-                                <TextField fx:id="bidAmountField" promptText="Giá muốn đặt" />
-                                <Button fx:id="placeBidButton" onAction="#handlePlaceBid" styleClass="primary-button" text="Đặt giá" />
-                                <TextField fx:id="autoMaxBidField" promptText="maxBid" />
-                                <TextField fx:id="autoIncrementField" promptText="increment" />
-                                <Button fx:id="configureAutoBidButton" onAction="#handleConfigureAutoBid" text="Thiết lập auto-bid" />
-                            </HBox>
-                        </VBox>
+                            </center>
+                            <bottom>
+                                <HBox alignment="CENTER_LEFT" spacing="12.0" styleClass="bid-bar">
+                                    <padding>
+                                        <Insets bottom="12.0" left="12.0" right="24.0" top="12.0" />
+                                    </padding>
+                                    <TextField fx:id="bidAmountField" promptText="Giá muốn đặt" />
+                                    <Button fx:id="placeBidButton" onAction="#handlePlaceBid" styleClass="primary-button" text="Đặt giá" />
+                                    <TextField fx:id="autoMaxBidField" promptText="maxBid" />
+                                    <TextField fx:id="autoIncrementField" promptText="increment" />
+                                    <Button fx:id="configureAutoBidButton" onAction="#handleConfigureAutoBid" text="Thiết lập auto-bid" />
+                                </HBox>
+                            </bottom>
+                        </BorderPane>
                     </content>
                 </Tab>
                 <Tab fx:id="sellerTab" text="Quản lý sản phẩm">
