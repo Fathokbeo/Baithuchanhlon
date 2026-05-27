@@ -1,5 +1,8 @@
 package main.shared.model;
 
+import main.shared.util.MoneyUtils;
+
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.Objects;
 import java.util.UUID;
@@ -9,6 +12,7 @@ public abstract class User extends Entity {
     private final String passwordHash;
     private String displayName;
     private final Role role;
+    BigDecimal balance;
 
     protected User(
             UUID id,
@@ -17,13 +21,15 @@ public abstract class User extends Entity {
             String username,
             String passwordHash,
             String displayName,
-            Role role
+            Role role,
+            BigDecimal balance
     ) {
         super(id, createdAt, updatedAt);
         this.username = requireText(username, "username");
         this.passwordHash = requireText(passwordHash, "passwordHash");
         this.displayName = requireText(displayName, "displayName");
         this.role = Objects.requireNonNull(role, "role");
+        this.balance = MoneyUtils.normalize(Objects.requireNonNull(balance, "balance"));
     }
 
     public String getUsername() {
@@ -52,5 +58,13 @@ public abstract class User extends Entity {
             throw new IllegalArgumentException(fieldName + " must not be blank");
         }
         return value.trim();
+    }
+    public BigDecimal getBalance() {
+        return balance;
+    }
+
+    public void setBalance(BigDecimal balance, LocalDateTime timestamp) {
+        this.balance = MoneyUtils.normalize(Objects.requireNonNull(balance, "balance"));
+        touch(timestamp);
     }
 }
