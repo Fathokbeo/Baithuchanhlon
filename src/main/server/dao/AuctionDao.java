@@ -121,8 +121,8 @@ public final class AuctionDao {
                 merge into auctions (
                     id, seller_id, item_id, item_type, item_name, item_description, item_image_path, starting_price,
                     current_price, special_field, leading_bidder_id, leading_bidder_name, winner_bidder_id,
-                    winner_bidder_name, status, start_time, end_time, extension_count, created_at, updated_at
-                ) values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                    winner_bidder_name, status, start_time, end_time, extension_count, min_rate, created_at, updated_at
+                ) values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                 """)) {
    Item item = auction.getItem();
    statement.setString(1, auction.getId().toString());
@@ -143,8 +143,9 @@ public final class AuctionDao {
    statement.setTimestamp(16, Timestamp.valueOf(auction.getStartTime()));
    statement.setTimestamp(17, Timestamp.valueOf(auction.getEndTime()));
    statement.setInt(18, auction.getExtensionCount());
-   statement.setTimestamp(19, Timestamp.valueOf(auction.getCreatedAt()));
-   statement.setTimestamp(20, Timestamp.valueOf(auction.getUpdatedAt()));
+   statement.setBigDecimal(19, auction.getMinRate());
+   statement.setTimestamp(20, Timestamp.valueOf(auction.getCreatedAt()));
+   statement.setTimestamp(21, Timestamp.valueOf(auction.getUpdatedAt()));
    statement.executeUpdate();
   }
  }
@@ -236,6 +237,7 @@ public final class AuctionDao {
           resultSet.getTimestamp("start_time").toLocalDateTime(),
           resultSet.getTimestamp("end_time").toLocalDateTime(),
           resultSet.getInt("extension_count"),
+          resultSet.getBigDecimal("min_rate"),
           loadBids(connection, auctionId),
           loadAutoBids(connection, auctionId)
   );

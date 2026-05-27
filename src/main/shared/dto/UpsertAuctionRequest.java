@@ -15,6 +15,7 @@ public record UpsertAuctionRequest(
         BigDecimal startingPrice,
         LocalDateTime startTime,
         LocalDateTime endTime,
-        String specialField
+        String specialField,
+        BigDecimal minRate
 ) {
 }

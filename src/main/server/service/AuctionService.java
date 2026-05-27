@@ -64,6 +64,10 @@ public final class AuctionService {
         ensureSeller(seller);
         validateAuctionPayload(request.name(), request.description(), request.startingPrice(), request.startTime(), request.endTime(),
                 request.specialField());
+        BigDecimal minRate = request.minRate() == null ? BigDecimal.ZERO : MoneyUtils.normalize(request.minRate());
+        if (minRate.signum() < 0) {
+            throw new IllegalArgumentException("MinRate khong duoc am");
+        }
         if (request.auctionId() == null) {
             UUID auctionId = UUID.randomUUID();
             Item item = ItemFactory.create(
@@ -93,6 +97,7 @@ public final class AuctionService {
                     request.startTime(),
                     request.endTime(),
                     0,
+                    minRate,
                     new ArrayList<>(),
                     new ArrayList<>()
             );
@@ -119,6 +124,7 @@ public final class AuctionService {
             auction.getItem().setStartingPrice(MoneyUtils.normalize(request.startingPrice()), now);
             auction.setStartTime(request.startTime(), now);
             auction.setEndTime(request.endTime(), now);
+            auction.setMinRate(minRate, now);
             auction.setLeader(null, null, MoneyUtils.normalize(request.startingPrice()), now);
             auction.setStatus(now.isBefore(request.startTime()) ? AuctionStatus.OPEN : AuctionStatus.RUNNING, now);
             auction.refreshLifecycle(now);

@@ -67,6 +67,7 @@ public final class AuctionViewMapper {
                 auction.getLeadingBidderName(),
                 auction.getWinnerBidderName(),
                 auction.getExtensionCount(),
+                auction.getMinRate(),
                 bidHistory,
                 priceHistory,
                 autoBids

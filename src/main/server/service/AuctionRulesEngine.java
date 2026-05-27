@@ -31,6 +31,10 @@ public final class AuctionRulesEngine {
         if (normalizedAmount.compareTo(auction.getCurrentPrice()) <= 0) {
             throw new IllegalArgumentException("Gia dau phai cao hon gia hien tai");
         }
+        BigDecimal minRate = auction.getMinRate();
+        if (minRate.signum() > 0 && normalizedAmount.compareTo(auction.getCurrentPrice().add(minRate)) < 0) {
+            throw new IllegalArgumentException("Muc tang gia toi thieu la " + minRate.toPlainString());
+        }
         auction.addBid(createBid(auction, bidder, normalizedAmount, now, BidSource.MANUAL), now);
         applyAntiSniping(auction, now);
         resolveAutoBidCompetition(auction, now);
@@ -48,6 +52,10 @@ public final class AuctionRulesEngine {
         BigDecimal normalizedIncrement = MoneyUtils.normalize(increment);
         if (normalizedIncrement.signum() <= 0) {
             throw new IllegalArgumentException("Buoc gia phai lon hon 0");
+        }
+        BigDecimal minRate = auction.getMinRate();
+        if (minRate.signum() > 0 && normalizedIncrement.compareTo(minRate) < 0) {
+            throw new IllegalArgumentException("Increment toi thieu la " + minRate.toPlainString());
         }
         if (normalizedMax.compareTo(auction.getCurrentPrice()) <= 0) {
             throw new IllegalArgumentException("maxBid phai cao hon gia hien tai");

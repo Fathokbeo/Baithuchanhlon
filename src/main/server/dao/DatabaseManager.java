@@ -71,6 +71,11 @@ public final class DatabaseManager {
             } catch (SQLException ignored) {
                 // Column already exists.
             }
+            try {
+                statement.execute("alter table auctions add column min_rate decimal(19,2) not null default 0");
+            } catch (SQLException ignored) {
+                // Column already exists.
+            }
             statement.execute("""
                     create table if not exists bids (
                         id varchar(36) primary key,

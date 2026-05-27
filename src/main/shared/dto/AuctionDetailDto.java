@@ -24,6 +24,7 @@ public record AuctionDetailDto(
         String leadingBidderName,
         String winnerBidderName,
         int extensionCount,
+        BigDecimal minRate,
         List<BidTransactionDto> bidHistory,
         List<PricePointDto> priceHistory,
         List<AutoBidDto> autoBids

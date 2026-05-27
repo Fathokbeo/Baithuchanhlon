@@ -86,6 +86,7 @@ public final class DataSeeder {
                 now.minusMinutes(5),
                 now.plusMinutes(10),
                 0,
+                java.math.BigDecimal.ZERO,
                 List.of(bid),
                 List.of()
         );
@@ -119,6 +120,7 @@ public final class DataSeeder {
                 now.plusMinutes(2),
                 now.plusMinutes(25),
                 0,
+                java.math.BigDecimal.ZERO,
                 List.of(),
                 List.of()
         );
@@ -163,6 +165,7 @@ public final class DataSeeder {
                 now.minusHours(2),
                 now.minusMinutes(65),
                 0,
+                java.math.BigDecimal.ZERO,
                 List.of(bid),
                 List.of()
         );

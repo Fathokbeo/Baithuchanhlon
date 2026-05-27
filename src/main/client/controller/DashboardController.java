@@ -432,6 +432,16 @@ public final class DashboardController {
         detailCurrentPriceLabel.setText(MoneyUtils.display(auction.currentPrice()));
         detailItemInfoLabel.setText(auction.itemInfo());
         detailExtensionLabel.setText("Gia han: " + auction.extensionCount() + " lan");
+        if (AppContext.state().getCurrentUser().role() == Role.BIDDER) {
+            BigDecimal minRate = auction.minRate() == null ? BigDecimal.ZERO : auction.minRate();
+            if (minRate.signum() > 0) {
+                bidAmountField.setText(auction.currentPrice().add(minRate).stripTrailingZeros().toPlainString());
+                autoIncrementField.setText(minRate.stripTrailingZeros().toPlainString());
+            } else {
+                bidAmountField.setText(auction.currentPrice().add(BigDecimal.ONE).stripTrailingZeros().toPlainString());
+                autoIncrementField.clear();
+            }
+        }
         renderDescription(auction.description());
         bidHistoryTable.setItems(FXCollections.observableArrayList(
                 auction.bidHistory() == null ? java.util.List.of() : auction.bidHistory()
@@ -581,6 +591,7 @@ priceChart.getData().setAll(series);
         TextField startTimeField = new TextField("20:00:00");
         DatePicker endDatePicker = new DatePicker(LocalDate.now().plusDays(1));
         TextField endTimeField = new TextField("20:30:00");
+        TextField minRateField = new TextField("0");
         TextField imagePathField = new TextField();
         imagePathField.setEditable(false);
 
@@ -621,6 +632,8 @@ priceChart.getData().setAll(series);
             startTimeField.setText(auction.startTime().toLocalTime().format(TIME_FORMAT));
             endDatePicker.setValue(auction.endTime().toLocalDate());
             endTimeField.setText(auction.endTime().toLocalTime().format(TIME_FORMAT));
+            BigDecimal mr = auction.minRate();
+            minRateField.setText(mr == null ? "0" : mr.stripTrailingZeros().toPlainString());
         } else {
             typeComboBox.setValue(ItemType.ELECTRONICS);
         }
@@ -634,22 +647,23 @@ priceChart.getData().setAll(series);
         gridPane.add(nameField, 1, 1);
         gridPane.add(new Label("Gia khoi diem"), 0, 2);
         gridPane.add(priceField, 1, 2);
-        gridPane.add(new Label("Bat dau"), 0, 3);
-        gridPane.add(startDatePicker, 1, 3);
-        gridPane.add(new Label("Gio bat dau"), 0, 4);
-        gridPane.add(startTimeField, 1, 4);
-        gridPane.add(new Label("Ket thuc"), 0, 5);
-        gridPane.add(endDatePicker, 1, 5);
-        gridPane.add(new Label("Gio ket thuc"), 0, 6);
-        gridPane.add(endTimeField, 1, 6);
-        gridPane.add(new Label("Thong so them"), 0, 7);
-        gridPane.add(specialField, 1, 7);
-        gridPane.add(new Label("Ảnh"), 0, 8);
-        gridPane.add(imagePathField, 1, 8);
-        gridPane.add(chooseImageButton, 2, 8);
-
-        gridPane.add(new Label("Mô tả"), 0, 9);
-        gridPane.add(descriptionField, 1, 9);
+        gridPane.add(new Label("MinRate (tang toi thieu)"), 0, 3);
+        gridPane.add(minRateField, 1, 3);
+        gridPane.add(new Label("Bat dau"), 0, 4);
+        gridPane.add(startDatePicker, 1, 4);
+        gridPane.add(new Label("Gio bat dau"), 0, 5);
+        gridPane.add(startTimeField, 1, 5);
+        gridPane.add(new Label("Ket thuc"), 0, 6);
+        gridPane.add(endDatePicker, 1, 6);
+        gridPane.add(new Label("Gio ket thuc"), 0, 7);
+        gridPane.add(endTimeField, 1, 7);
+        gridPane.add(new Label("Thong so them"), 0, 8);
+        gridPane.add(specialField, 1, 8);
+        gridPane.add(new Label("Anh"), 0, 9);
+        gridPane.add(imagePathField, 1, 9);
+        gridPane.add(chooseImageButton, 2, 9);
+        gridPane.add(new Label("Mo ta"), 0, 10);
+        gridPane.add(descriptionField, 1, 10);
         dialog.getDialogPane().setContent(gridPane);
 
         dialog.setResultConverter(buttonType -> {
@@ -667,7 +681,8 @@ priceChart.getData().setAll(series);
                     parseAmount(priceField.getText()),
                     startTime,
                     endTime,
-                    specialField.getText().trim()
+                    specialField.getText().trim(),
+                    parseAmount(minRateField.getText())
             );
         });
         return dialog.showAndWait();
