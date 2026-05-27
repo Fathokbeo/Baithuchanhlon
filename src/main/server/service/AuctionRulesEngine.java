@@ -25,6 +25,9 @@ public final class AuctionRulesEngine {
         auction.refreshLifecycle(now);
         BigDecimal normalizedAmount = MoneyUtils.normalize(amount);
         ensureAuctionRunning(auction, now);
+        if (normalizedAmount.compareTo(bidder.getBalance()) > 0) {
+            throw new IllegalArgumentException("Số tiền bid không được vượt quá số dư trong ví");
+        }
         if (normalizedAmount.compareTo(auction.getCurrentPrice()) <= 0) {
             throw new IllegalArgumentException("Gia dau phai cao hon gia hien tai");
         }
@@ -156,7 +159,7 @@ public final class AuctionRulesEngine {
 
     private static final class ProxyBidder extends User {
         private ProxyBidder(UUID id, String displayName) {
-            super(id, LocalDateTime.now(), LocalDateTime.now(), "proxy-" + id, "n/a", displayName, Role.BIDDER);
+            super(id, LocalDateTime.now(), LocalDateTime.now(), "proxy-" + id, "n/a", displayName, Role.BIDDER, BigDecimal.ZERO);
         }
     }
 }

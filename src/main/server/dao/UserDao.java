@@ -5,17 +5,16 @@ import main.shared.model.Bidder;
 import main.shared.model.Role;
 import main.shared.model.Seller;
 import main.shared.model.User;
+import main.shared.util.MoneyUtils;
 
+import java.math.BigDecimal;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 
 public final class UserDao {
     private final DatabaseManager databaseManager;
@@ -27,16 +26,17 @@ public final class UserDao {
     public void save(User user) {
         try (Connection connection = databaseManager.getConnection();
              PreparedStatement statement = connection.prepareStatement("""
-                     merge into users (id, username, password_hash, display_name, role, created_at, updated_at)
-                     values (?, ?, ?, ?, ?, ?, ?)
+                     merge into users (id, username, password_hash, display_name, role, balance, created_at, updated_at)
+                     values (?, ?, ?, ?, ?, ?, ?, ?)
                      """)) {
             statement.setString(1, user.getId().toString());
             statement.setString(2, user.getUsername());
             statement.setString(3, user.getPasswordHash());
             statement.setString(4, user.getDisplayName());
             statement.setString(5, user.getRole().name());
-            statement.setTimestamp(6, Timestamp.valueOf(user.getCreatedAt()));
-            statement.setTimestamp(7, Timestamp.valueOf(user.getUpdatedAt()));
+            statement.setBigDecimal(6, user.getBalance());
+            statement.setTimestamp(7, Timestamp.valueOf(user.getCreatedAt()));
+            statement.setTimestamp(8, Timestamp.valueOf(user.getUpdatedAt()));
             statement.executeUpdate();
         } catch (SQLException exception) {
             throw new IllegalStateException("Cannot save user", exception);
@@ -104,10 +104,11 @@ public final class UserDao {
         String passwordHash = resultSet.getString("password_hash");
         String displayName = resultSet.getString("display_name");
         Role role = Role.valueOf(resultSet.getString("role"));
+        BigDecimal balance = MoneyUtils.normalize(Objects.requireNonNull(resultSet.getBigDecimal("balance"), "balance"));
         return switch (role) {
-            case BIDDER -> new Bidder(id, createdAt, updatedAt, username, passwordHash, displayName);
-            case SELLER -> new Seller(id, createdAt, updatedAt, username, passwordHash, displayName);
-            case ADMIN -> new Admin(id, createdAt, updatedAt, username, passwordHash, displayName);
+            case BIDDER -> new Bidder(id, createdAt, updatedAt, username, passwordHash, displayName, balance);
+            case SELLER -> new Seller(id, createdAt, updatedAt, username, passwordHash, displayName, balance);
+            case ADMIN -> new Admin(id, createdAt, updatedAt, username, passwordHash, displayName, balance);
         };
     }
 }

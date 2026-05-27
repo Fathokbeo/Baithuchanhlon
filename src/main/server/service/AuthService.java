@@ -6,6 +6,7 @@ import main.shared.model.Role;
 import main.shared.model.Seller;
 import main.shared.model.User;
 import main.shared.util.PasswordUtils;
+import java.math.BigDecimal;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -33,9 +34,9 @@ public final class AuthService {
         });
         LocalDateTime now = LocalDateTime.now();
         User user = switch (role) {
-            case BIDDER -> new Bidder(UUID.randomUUID(), now, now, username, PasswordUtils.hash(password), displayName);
-            case SELLER -> new Seller(UUID.randomUUID(), now, now, username, PasswordUtils.hash(password), displayName);
-            case ADMIN -> new Admin(UUID.randomUUID(), now, now, username, PasswordUtils.hash(password), displayName);
+            case BIDDER -> new Bidder(UUID.randomUUID(), now, now, username, PasswordUtils.hash(password), displayName, BigDecimal.ZERO);
+            case SELLER -> new Seller(UUID.randomUUID(), now, now, username, PasswordUtils.hash(password), displayName, BigDecimal.ZERO);
+            default -> throw new IllegalArgumentException("Invalid role for registration");
         };
         userDao.save(user);
         return user;
