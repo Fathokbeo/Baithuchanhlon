@@ -43,7 +43,7 @@ public final class LoginController {
         if (loginButton.isDisabled()) {
             return;
         }
-            setBusy(true, "Dang dang nhap...");
+            setBusy(true, "Đang đăng nhập...");
             AppContext.service().login(loginUsernameField.getText().trim(), loginPasswordField.getText())
                     .thenAccept(response -> Platform.runLater(() -> {
                         AppContext.state().setCurrentUser(response.user());
@@ -64,7 +64,7 @@ public final class LoginController {
         if (!password.equals(confirmPassword)) {
             setBusy(false, "Mật khẩu xác nhận sai, vui lòng kiểm tra lại");
         } else {
-            setBusy(true, "Dang tao tai khoan...");
+            setBusy(true, "Đang tạo tài khoản...");
             RegisterRequest request = new RegisterRequest(
                     registerUsernameField.getText().trim(),
                     registerPasswordField.getText(),
@@ -90,11 +90,11 @@ public final class LoginController {
 
     private void openDashboard() {
         try {
-            setBusy(true, "Dang mo dashboard...");
+            setBusy(true, "Đang mở dashboard...");
             AppContext.showDashboardView();
         } catch (RuntimeException exception) {
             AppContext.state().setCurrentUser(null);
-            setBusy(false, "Khong the mo man hinh chinh");
+            setBusy(false, "Không thể mở màn hình chính");
             AlertHelper.error(extractMessage(exception));
         }
     }
@@ -103,6 +103,6 @@ public final class LoginController {
         Throwable cause = throwable instanceof CompletionException && throwable.getCause() != null
                 ? throwable.getCause()
                 : throwable;
-        return cause.getMessage() == null ? "Co loi xay ra" : cause.getMessage();
+        return cause.getMessage() == null ? "Có lỗi xảy ra" : cause.getMessage();
     }
 }
