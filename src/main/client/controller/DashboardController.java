@@ -472,7 +472,7 @@ priceChart.getData().setAll(series);
         renderDescription("");
         bidHistoryTable.setItems(FXCollections.emptyObservableList());
         autoBidTable.setItems(FXCollections.emptyObservableList());
-        //priceChart.getData().clear();
+        priceChart.getData().clear();
     }
 
     private void renderDescription(String description) {

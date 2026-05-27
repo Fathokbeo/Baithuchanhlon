@@ -13,6 +13,7 @@
 <?import javafx.scene.control.TableColumn?>
 <?import javafx.scene.control.TableView?>
 <?import javafx.scene.control.TextField?>
+<?import javafx.scene.image.ImageView?>
 <?import javafx.scene.layout.BorderPane?>
 <?import javafx.scene.layout.ColumnConstraints?>
 <?import javafx.scene.layout.GridPane?>
@@ -89,12 +90,13 @@
                            <RowConstraints />
                         </rowConstraints>
                             </GridPane>
+                            <ImageView fx:id="itemImageView" fitHeight="140.0" fitWidth="200.0" preserveRatio="true" />
                             <VBox spacing="12.0" styleClass="panel-card" VBox.vgrow="ALWAYS">
                                 <padding>
                                     <Insets bottom="16.0" left="16.0" right="16.0" top="16.0" />
                                 </padding>
                                 <Label styleClass="section-title" text="Mô tả" />
-                                <ScrollPane fitToWidth="true" prefHeight="513.0" prefWidth="972.0" styleClass="description-scroll" VBox.vgrow="NEVER">
+                                <ScrollPane fitToWidth="true" prefHeight="120.0" styleClass="description-scroll" VBox.vgrow="NEVER">
                                     <content>
                                         <TextFlow fx:id="descriptionFlow" styleClass="description-flow" />
                                     </content>
@@ -109,7 +111,7 @@
                                 </TableView>
                             </VBox>
                             <Label styleClass="section-title" text="Biểu đồ giá realtime" />
-                            <LineChart fx:id="priceChart" createSymbols="true" legendVisible="false" VBox.vgrow="ALWAYS">
+                            <LineChart fx:id="priceChart" createSymbols="true" legendVisible="false" prefHeight="220.0" VBox.vgrow="ALWAYS">
                                 <xAxis>
                                     <CategoryAxis />
                                 </xAxis>
