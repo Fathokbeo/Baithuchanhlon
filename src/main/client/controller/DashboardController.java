@@ -58,8 +58,6 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
-import javafx.stage.FileChooser;
-
 import java.io.File;
 
 public final class DashboardController {
@@ -592,22 +590,6 @@ priceChart.getData().setAll(series);
         DatePicker endDatePicker = new DatePicker(LocalDate.now().plusDays(1));
         TextField endTimeField = new TextField("20:30:00");
         TextField minRateField = new TextField("0");
-        TextField imagePathField = new TextField();
-        imagePathField.setEditable(false);
-
-        Button chooseImageButton = new Button("Chọn ảnh");
-        chooseImageButton.setOnAction(event -> {
-            FileChooser chooser = new FileChooser();
-            chooser.setTitle("Chọn ảnh sản phẩm");
-            chooser.getExtensionFilters().add(
-                    new FileChooser.ExtensionFilter("Ảnh", "*.png", "*.jpg", "*.jpeg", "*.webp")
-            );
-
-            File file = chooser.showOpenDialog(dialog.getDialogPane().getScene().getWindow());
-            if (file != null) {
-                imagePathField.setText(file.getAbsolutePath());
-            }
-        });
         typeComboBox.setConverter(new StringConverter<>() {
             @Override
             public String toString(ItemType object) {
@@ -626,7 +608,6 @@ priceChart.getData().setAll(series);
             nameField.setText(auction.itemName());
             priceField.setText(auction.startingPrice().stripTrailingZeros().toPlainString());
             descriptionField.setText(auction.description());
-            imagePathField.setText(auction.imagePath() == null ? "" : auction.imagePath());
             specialField.setText(auction.itemInfo().replaceFirst("^[^|]+\\s\\|\\s", ""));
             startDatePicker.setValue(auction.startTime().toLocalDate());
             startTimeField.setText(auction.startTime().toLocalTime().format(TIME_FORMAT));
@@ -659,11 +640,8 @@ priceChart.getData().setAll(series);
         gridPane.add(endTimeField, 1, 7);
         gridPane.add(new Label("Thong so them"), 0, 8);
         gridPane.add(specialField, 1, 8);
-        gridPane.add(new Label("Anh"), 0, 9);
-        gridPane.add(imagePathField, 1, 9);
-        gridPane.add(chooseImageButton, 2, 9);
-        gridPane.add(new Label("Mo ta"), 0, 10);
-        gridPane.add(descriptionField, 1, 10);
+        gridPane.add(new Label("Mo ta"), 0, 9);
+        gridPane.add(descriptionField, 1, 9);
         dialog.getDialogPane().setContent(gridPane);
 
         dialog.setResultConverter(buttonType -> {
@@ -677,7 +655,7 @@ priceChart.getData().setAll(series);
                     typeComboBox.getValue(),
                     nameField.getText().trim(),
                     descriptionField.getText().trim(),
-                    imagePathField.getText().trim(),
+                    null,
                     parseAmount(priceField.getText()),
                     startTime,
                     endTime,
