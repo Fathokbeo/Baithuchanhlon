@@ -76,9 +76,11 @@
                                         <Label fx:id="detailLeadingLabel" text="-" GridPane.columnIndex="1" GridPane.rowIndex="2" />
                                         <Label styleClass="label-heading" text="Giá hiện tại" GridPane.columnIndex="2" GridPane.rowIndex="2" />
                                         <Label fx:id="detailCurrentPriceLabel" styleClass="value-heading" text="-" GridPane.columnIndex="3" GridPane.rowIndex="2" />
-                                        <Label styleClass="label-heading" text="Phân loại" GridPane.rowIndex="3" />
-                                        <Label fx:id="detailItemInfoLabel" text="-" GridPane.columnIndex="1" GridPane.rowIndex="3" />
-                                        <Label fx:id="detailExtensionLabel" text="Gia han: 0 lan" GridPane.columnIndex="3" GridPane.rowIndex="3" />
+                                        <Label styleClass="label-heading" text="Min raise" GridPane.rowIndex="3" />
+                                        <Label fx:id="detailMinRaiseLabel" text="-" GridPane.columnIndex="1" GridPane.rowIndex="3" />
+                                        <Label styleClass="label-heading" text="Phân loại" GridPane.columnIndex="2" GridPane.rowIndex="3" />
+                                        <Label fx:id="detailItemInfoLabel" text="-" GridPane.columnIndex="3" GridPane.rowIndex="3" />
+                                        <Label fx:id="detailExtensionLabel" text="Gia han: 0 lan" GridPane.columnIndex="3" GridPane.rowIndex="4" />
                                         <columnConstraints>
                                             <ColumnConstraints />
                                             <ColumnConstraints />

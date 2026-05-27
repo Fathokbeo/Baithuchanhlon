@@ -16,7 +16,7 @@ public final class Auction extends Entity {
     private LocalDateTime startTime;
     private LocalDateTime endTime;
     private int extensionCount;
-    private BigDecimal minRate;
+    private BigDecimal minRaise;
     private final List<BidTransaction> bidHistory;
     private final List<AutoBidConfig> autoBidConfigs;
 
@@ -35,7 +35,7 @@ public final class Auction extends Entity {
             LocalDateTime startTime,
             LocalDateTime endTime,
             int extensionCount,
-            BigDecimal minRate,
+            BigDecimal minRaise,
             List<BidTransaction> bidHistory,
             List<AutoBidConfig> autoBidConfigs
     ) {
@@ -51,7 +51,7 @@ public final class Auction extends Entity {
         this.startTime = Objects.requireNonNull(startTime, "startTime");
         this.endTime = Objects.requireNonNull(endTime, "endTime");
         this.extensionCount = extensionCount;
-        this.minRate = minRate == null ? BigDecimal.ZERO : minRate;
+        this.minRaise = minRaise == null ? BigDecimal.ZERO : minRaise;
         this.bidHistory = new ArrayList<>(Objects.requireNonNull(bidHistory, "bidHistory"));
         this.autoBidConfigs = new ArrayList<>(Objects.requireNonNull(autoBidConfigs, "autoBidConfigs"));
     }
@@ -126,12 +126,12 @@ public final class Auction extends Entity {
         extensionCount++;
     }
 
-    public BigDecimal getMinRate() {
-        return minRate;
+    public BigDecimal getMinRaise() {
+        return minRaise;
     }
 
-    public void setMinRate(BigDecimal minRate, LocalDateTime timestamp) {
-        this.minRate = minRate == null ? BigDecimal.ZERO : minRate;
+    public void setMinRaise(BigDecimal minRaise, LocalDateTime timestamp) {
+        this.minRaise = minRaise == null ? BigDecimal.ZERO : minRaise;
         touch(timestamp);
     }
 

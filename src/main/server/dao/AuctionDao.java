@@ -143,7 +143,7 @@ public final class AuctionDao {
    statement.setTimestamp(16, Timestamp.valueOf(auction.getStartTime()));
    statement.setTimestamp(17, Timestamp.valueOf(auction.getEndTime()));
    statement.setInt(18, auction.getExtensionCount());
-   statement.setBigDecimal(19, auction.getMinRate());
+   statement.setBigDecimal(19, auction.getMinRaise());
    statement.setTimestamp(20, Timestamp.valueOf(auction.getCreatedAt()));
    statement.setTimestamp(21, Timestamp.valueOf(auction.getUpdatedAt()));
    statement.executeUpdate();

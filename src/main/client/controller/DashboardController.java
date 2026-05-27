@@ -99,6 +99,8 @@ public final class DashboardController {
     @FXML
     private Label detailCurrentPriceLabel;
     @FXML
+    private Label detailMinRaiseLabel;
+    @FXML
     private Label detailItemInfoLabel;
     @FXML
     private Label detailExtensionLabel;
@@ -428,13 +430,14 @@ public final class DashboardController {
         detailTimeLabel.setText(TimeUtils.display(auction.startTime()) + " -> " + TimeUtils.display(auction.endTime()));
         detailLeadingLabel.setText(auction.leadingBidderName() == null ? "-" : auction.leadingBidderName());
         detailCurrentPriceLabel.setText(MoneyUtils.display(auction.currentPrice()));
+        detailMinRaiseLabel.setText(MoneyUtils.display(auction.minRaise() == null ? BigDecimal.ZERO : auction.minRaise()));
         detailItemInfoLabel.setText(auction.itemInfo());
         detailExtensionLabel.setText("Gia han: " + auction.extensionCount() + " lan");
+        BigDecimal minRaise = auction.minRaise() == null ? BigDecimal.ZERO : auction.minRaise();
         if (AppContext.state().getCurrentUser().role() == Role.BIDDER) {
-            BigDecimal minRate = auction.minRate() == null ? BigDecimal.ZERO : auction.minRate();
-            if (minRate.signum() > 0) {
-                bidAmountField.setText(auction.currentPrice().add(minRate).stripTrailingZeros().toPlainString());
-                autoIncrementField.setText(minRate.stripTrailingZeros().toPlainString());
+            if (minRaise.signum() > 0) {
+                bidAmountField.setText(auction.currentPrice().add(minRaise).stripTrailingZeros().toPlainString());
+                autoIncrementField.setText(minRaise.stripTrailingZeros().toPlainString());
             } else {
                 bidAmountField.setText(auction.currentPrice().add(BigDecimal.ONE).stripTrailingZeros().toPlainString());
                 autoIncrementField.clear();
@@ -589,7 +592,7 @@ priceChart.getData().setAll(series);
         TextField startTimeField = new TextField("20:00:00");
         DatePicker endDatePicker = new DatePicker(LocalDate.now().plusDays(1));
         TextField endTimeField = new TextField("20:30:00");
-        TextField minRateField = new TextField("0");
+        TextField minRaiseField = new TextField("0");
         typeComboBox.setConverter(new StringConverter<>() {
             @Override
             public String toString(ItemType object) {
@@ -613,8 +616,8 @@ priceChart.getData().setAll(series);
             startTimeField.setText(auction.startTime().toLocalTime().format(TIME_FORMAT));
             endDatePicker.setValue(auction.endTime().toLocalDate());
             endTimeField.setText(auction.endTime().toLocalTime().format(TIME_FORMAT));
-            BigDecimal mr = auction.minRate();
-            minRateField.setText(mr == null ? "0" : mr.stripTrailingZeros().toPlainString());
+            BigDecimal mr = auction.minRaise();
+            minRaiseField.setText(mr == null ? "0" : mr.stripTrailingZeros().toPlainString());
         } else {
             typeComboBox.setValue(ItemType.ELECTRONICS);
         }
@@ -628,8 +631,8 @@ priceChart.getData().setAll(series);
         gridPane.add(nameField, 1, 1);
         gridPane.add(new Label("Gia khoi diem"), 0, 2);
         gridPane.add(priceField, 1, 2);
-        gridPane.add(new Label("MinRate (tang toi thieu)"), 0, 3);
-        gridPane.add(minRateField, 1, 3);
+        gridPane.add(new Label("MinRaise ( Mức tăng tối thiểu)") , 0, 3);
+        gridPane.add(minRaiseField, 1, 3);
         gridPane.add(new Label("Bat dau"), 0, 4);
         gridPane.add(startDatePicker, 1, 4);
         gridPane.add(new Label("Gio bat dau"), 0, 5);
@@ -660,7 +663,7 @@ priceChart.getData().setAll(series);
                     startTime,
                     endTime,
                     specialField.getText().trim(),
-                    parseAmount(minRateField.getText())
+                    parseAmount(minRaiseField.getText())
             );
         });
         return dialog.showAndWait();
