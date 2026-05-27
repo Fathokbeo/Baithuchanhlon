@@ -75,6 +75,8 @@ public final class DashboardController {
     @FXML
     private Label userLabel;
     @FXML
+    private Label balanceLabel;
+    @FXML
     private TableView<AuctionSummaryDto> auctionTable;
     @FXML
     private TableColumn<AuctionSummaryDto, String> auctionNameColumn;
@@ -188,6 +190,11 @@ public final class DashboardController {
     private void initialize() {
         SessionUserDto user = AppContext.state().getCurrentUser();
         userLabel.setText(user.displayName() + " (" + user.role() + ")");
+        try {
+            balanceLabel.setText("Số dư: " + MoneyUtils.display(user.balance()));
+        } catch (Exception e) {
+            balanceLabel.setText("");
+        }
         setupAuctionTable();
         setupDetailTables();
         setupSellerTable();

@@ -30,6 +30,7 @@
             </padding>
             <Label styleClass="dashboard-title" text="Auction Command Center" />
             <Label fx:id="userLabel" styleClass="pill-label" />
+            <Label fx:id="balanceLabel" styleClass="pill-label" />
             <HBox HBox.hgrow="ALWAYS" />
             <Button onAction="#handleRefresh" text="Làm mới" />
             <Button onAction="#handleLogout" text="Đăng xuất" />

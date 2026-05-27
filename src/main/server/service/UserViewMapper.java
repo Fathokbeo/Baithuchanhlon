@@ -8,7 +8,7 @@ public final class UserViewMapper {
     }
 
     public static SessionUserDto toSessionUser(User user) {
-        return new SessionUserDto(user.getId(), user.getUsername(), user.getDisplayName(), user.getRole());
+        return new SessionUserDto(user.getId(), user.getUsername(), user.getDisplayName(), user.getRole(), user.getBalance());
     }
 
     public static UserRowDto toRow(User user) {
