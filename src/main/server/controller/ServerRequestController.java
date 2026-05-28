@@ -176,7 +176,14 @@ public final class ServerRequestController {
     private void handleUpdateUserInfo(ClientSession session, ApiMessage request) {
         User user = requireUser(session);
         UpdateUserInfoRequest payload = JsonUtils.fromJsonNode(request.getPayload(), UpdateUserInfoRequest.class);
-        User updatedUser = authService.updateUserInfo(user, payload.displayName(), payload.balance());
+        User updatedUser = authService.updateUserInfo(
+                user,
+                payload.displayName(),
+                payload.balance(),
+                payload.email(),
+                payload.phone(),
+                payload.address()
+        );
         session.setAuthenticatedUser(updatedUser);
         sendSuccess(session, request, new AuthResponse(UserViewMapper.toSessionUser(updatedUser), "Thong tin user da duoc luu"));
     }

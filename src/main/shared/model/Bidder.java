@@ -16,4 +16,19 @@ public final class Bidder extends User {
     ) {
         super(id, createdAt, updatedAt, username, passwordHash, displayName, Role.BIDDER, balance);
     }
+
+    public Bidder(
+            UUID id,
+            LocalDateTime createdAt,
+            LocalDateTime updatedAt,
+            String username,
+            String passwordHash,
+            String displayName,
+            BigDecimal balance,
+            String email,
+            String phone,
+            String address
+    ) {
+        super(id, createdAt, updatedAt, username, passwordHash, displayName, Role.BIDDER, balance, email, phone, address);
+    }
 }

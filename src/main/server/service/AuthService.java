@@ -49,15 +49,17 @@ public final class AuthService {
         return userDao.findAll();
     }
 
-    public User updateUserInfo(User user, String displayName, BigDecimal balance) {
+    public User updateUserInfo(User user, String displayName, BigDecimal balance, String email, String phone, String address) {
         if (displayName == null || displayName.isBlank()) {
             throw new IllegalArgumentException("Ten hien thi khong duoc de trong");
         }
         if (balance == null || balance.signum() < 0) {
             throw new IllegalArgumentException("So du khong hop le");
         }
-        user.setDisplayName(displayName, LocalDateTime.now());
-        user.setBalance(balance, LocalDateTime.now());
+        LocalDateTime now = LocalDateTime.now();
+        user.setDisplayName(displayName, now);
+        user.setBalance(balance, now);
+        user.setContactInfo(email, phone, address, now);
         userDao.save(user);
         return user;
     }

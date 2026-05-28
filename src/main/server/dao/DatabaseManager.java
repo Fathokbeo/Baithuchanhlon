@@ -33,12 +33,30 @@ public final class DatabaseManager {
                         display_name varchar(120) not null,
                         role varchar(20) not null,
                         balance decimal(19,2) not null default 0,
+                        email varchar(255) not null default '',
+                        phone varchar(50) not null default '',
+                        address varchar(1000) not null default '',
                         created_at timestamp not null,
                         updated_at timestamp not null
                     )
                     """);
             try {
                 statement.execute("alter table users add column balance decimal(19,2) not null default 0");
+            } catch (SQLException ignored) {
+                // Column already exists.
+            }
+            try {
+                statement.execute("alter table users add column email varchar(255) not null default ''");
+            } catch (SQLException ignored) {
+                // Column already exists.
+            }
+            try {
+                statement.execute("alter table users add column phone varchar(50) not null default ''");
+            } catch (SQLException ignored) {
+                // Column already exists.
+            }
+            try {
+                statement.execute("alter table users add column address varchar(1000) not null default ''");
             } catch (SQLException ignored) {
                 // Column already exists.
             }

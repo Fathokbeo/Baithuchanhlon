@@ -13,6 +13,9 @@ public abstract class User extends Entity {
     private String displayName;
     private final Role role;
     BigDecimal balance;
+    private String email;
+    private String phone;
+    private String address;
 
     protected User(
             UUID id,
@@ -24,12 +27,31 @@ public abstract class User extends Entity {
             Role role,
             BigDecimal balance
     ) {
+        this(id, createdAt, updatedAt, username, passwordHash, displayName, role, balance, "", "", "");
+    }
+
+    protected User(
+            UUID id,
+            LocalDateTime createdAt,
+            LocalDateTime updatedAt,
+            String username,
+            String passwordHash,
+            String displayName,
+            Role role,
+            BigDecimal balance,
+            String email,
+            String phone,
+            String address
+    ) {
         super(id, createdAt, updatedAt);
         this.username = requireText(username, "username");
         this.passwordHash = requireText(passwordHash, "passwordHash");
         this.displayName = requireText(displayName, "displayName");
         this.role = Objects.requireNonNull(role, "role");
         this.balance = MoneyUtils.normalize(Objects.requireNonNull(balance, "balance"));
+        this.email = normalizeOptional(email);
+        this.phone = normalizeOptional(phone);
+        this.address = normalizeOptional(address);
     }
 
     public String getUsername() {
@@ -66,5 +88,28 @@ public abstract class User extends Entity {
     public void setBalance(BigDecimal balance, LocalDateTime timestamp) {
         this.balance = MoneyUtils.normalize(Objects.requireNonNull(balance, "balance"));
         touch(timestamp);
+    }
+
+    public String getEmail() {
+        return email;
+    }
+
+    public String getPhone() {
+        return phone;
+    }
+
+    public String getAddress() {
+        return address;
+    }
+
+    public void setContactInfo(String email, String phone, String address, LocalDateTime timestamp) {
+        this.email = normalizeOptional(email);
+        this.phone = normalizeOptional(phone);
+        this.address = normalizeOptional(address);
+        touch(timestamp);
+    }
+
+    private static String normalizeOptional(String value) {
+        return value == null ? "" : value.trim();
     }
 }

@@ -16,4 +16,19 @@ public final class Seller extends User {
     ) {
         super(id, createdAt, updatedAt, username, passwordHash, displayName, Role.SELLER, balance);
     }
+
+    public Seller(
+            UUID id,
+            LocalDateTime createdAt,
+            LocalDateTime updatedAt,
+            String username,
+            String passwordHash,
+            String displayName,
+            BigDecimal balance,
+            String email,
+            String phone,
+            String address
+    ) {
+        super(id, createdAt, updatedAt, username, passwordHash, displayName, Role.SELLER, balance, email, phone, address);
+    }
 }

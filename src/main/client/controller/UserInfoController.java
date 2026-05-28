@@ -38,6 +38,9 @@ public final class UserInfoController {
         displayNameField.setText(user.displayName());
         roleField.setText(user.role().name());
         balanceField.setText(user.balance().stripTrailingZeros().toPlainString());
+        emailField.setText(user.email());
+        phoneField.setText(user.phone());
+        addressField.setText(user.address());
     }
 
     @FXML
@@ -53,11 +56,20 @@ public final class UserInfoController {
             AlertHelper.error(exception.getMessage());
             return;
         }
-        AppContext.service().updateUserInfo(new UpdateUserInfoRequest(displayNameField.getText().trim(), balance))
+        AppContext.service().updateUserInfo(new UpdateUserInfoRequest(
+                        displayNameField.getText().trim(),
+                        balance,
+                        emailField.getText(),
+                        phoneField.getText(),
+                        addressField.getText()
+                ))
                 .thenAccept(response -> Platform.runLater(() -> {
                     AppContext.state().setCurrentUser(response.user());
                     displayNameField.setText(response.user().displayName());
                     balanceField.setText(response.user().balance().stripTrailingZeros().toPlainString());
+                    emailField.setText(response.user().email());
+                    phoneField.setText(response.user().phone());
+                    addressField.setText(response.user().address());
                     AlertHelper.info(response.message());
                 }))
                 .exceptionally(throwable -> {

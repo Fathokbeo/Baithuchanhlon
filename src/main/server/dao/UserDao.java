@@ -26,8 +26,8 @@ public final class UserDao {
     public void save(User user) {
         try (Connection connection = databaseManager.getConnection();
              PreparedStatement statement = connection.prepareStatement("""
-                     merge into users (id, username, password_hash, display_name, role, balance, created_at, updated_at)
-                     values (?, ?, ?, ?, ?, ?, ?, ?)
+                     merge into users (id, username, password_hash, display_name, role, balance, email, phone, address, created_at, updated_at)
+                     values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                      """)) {
             statement.setString(1, user.getId().toString());
             statement.setString(2, user.getUsername());
@@ -35,8 +35,11 @@ public final class UserDao {
             statement.setString(4, user.getDisplayName());
             statement.setString(5, user.getRole().name());
             statement.setBigDecimal(6, user.getBalance());
-            statement.setTimestamp(7, Timestamp.valueOf(user.getCreatedAt()));
-            statement.setTimestamp(8, Timestamp.valueOf(user.getUpdatedAt()));
+            statement.setString(7, user.getEmail());
+            statement.setString(8, user.getPhone());
+            statement.setString(9, user.getAddress());
+            statement.setTimestamp(10, Timestamp.valueOf(user.getCreatedAt()));
+            statement.setTimestamp(11, Timestamp.valueOf(user.getUpdatedAt()));
             statement.executeUpdate();
         } catch (SQLException exception) {
             throw new IllegalStateException("Cannot save user", exception);
@@ -105,10 +108,13 @@ public final class UserDao {
         String displayName = resultSet.getString("display_name");
         Role role = Role.valueOf(resultSet.getString("role"));
         BigDecimal balance = MoneyUtils.normalize(Objects.requireNonNull(resultSet.getBigDecimal("balance"), "balance"));
+        String email = Objects.toString(resultSet.getString("email"), "");
+        String phone = Objects.toString(resultSet.getString("phone"), "");
+        String address = Objects.toString(resultSet.getString("address"), "");
         return switch (role) {
-            case BIDDER -> new Bidder(id, createdAt, updatedAt, username, passwordHash, displayName, balance);
-            case SELLER -> new Seller(id, createdAt, updatedAt, username, passwordHash, displayName, balance);
-            case ADMIN -> new Admin(id, createdAt, updatedAt, username, passwordHash, displayName, balance);
+            case BIDDER -> new Bidder(id, createdAt, updatedAt, username, passwordHash, displayName, balance, email, phone, address);
+            case SELLER -> new Seller(id, createdAt, updatedAt, username, passwordHash, displayName, balance, email, phone, address);
+            case ADMIN -> new Admin(id, createdAt, updatedAt, username, passwordHash, displayName, balance, email, phone, address);
         };
     }
 }
