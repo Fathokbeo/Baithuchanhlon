@@ -57,4 +57,8 @@ public final class ClientSessionService {
     public CompletableFuture<UsersResponse> listUsers() {
         return connection.sendRequest(MessageType.LIST_USERS, null, UsersResponse.class);
     }
+
+    public CompletableFuture<AuthResponse> updateUserInfo(UpdateUserInfoRequest request) {
+        return connection.sendRequest(MessageType.UPDATE_USER_INFO, request, AuthResponse.class);
+    }
 }

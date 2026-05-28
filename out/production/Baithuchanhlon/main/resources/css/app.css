@@ -87,11 +87,20 @@
 .password-field,
 .combo-box,
 .text-area,
-.date-picker {
+.date-picker,
+.description-scroll {
     -fx-background-radius: 12px;
     -fx-border-radius: 12px;
     -fx-border-color: rgba(31,54,50,0.12);
     -fx-background-color: rgba(255,255,255,0.88);
+}
+
+.description-scroll > .viewport {
+    -fx-background-color: transparent;
+}
+
+.description-flow {
+    -fx-padding: 10px;
 }
 
 .table-view {
@@ -104,6 +113,22 @@
 .table-view .column-header-background {
     -fx-background-color: rgba(18,79,75,0.10);
     -fx-background-radius: 14px 14px 0 0;
+}
+
+.line-chart {
+    -fx-background-color: rgba(255,255,255,0.82);
+    -fx-background-radius: 14px;
+    -fx-border-radius: 14px;
+    -fx-border-color: rgba(31,54,50,0.10);
+}
+
+.default-color0.chart-series-line {
+    -fx-stroke: #c96b26;
+    -fx-stroke-width: 3px;
+}
+
+.default-color0.chart-line-symbol {
+    -fx-background-color: #c96b26, white;
 }
 
 .pill-label {

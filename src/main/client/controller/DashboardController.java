@@ -232,6 +232,12 @@ public final class DashboardController {
     }
 
     @FXML
+    private void handleUserInfo() {
+        AppContext.connection().removeAuctionListener(eventListener);
+        AppContext.showUserInfoView();
+    }
+
+    @FXML
     private void handleLogout() {
         AppContext.connection().removeAuctionListener(eventListener);
         AppContext.state().setCurrentUser(null);
@@ -389,11 +395,13 @@ public final class DashboardController {
     private void loadAuctionLists() {
         runAction(AppContext.service().listAuctions(), response -> {
             auctionTable.setItems(FXCollections.observableArrayList(response.auctions()));
+            restoreSelectedAuction(auctionTable);
             if (AppContext.state().getCurrentUser().role() == Role.SELLER && sellerDataLoaded) {
                 loadMyAuctions();
             }
             if (AppContext.state().getCurrentUser().role() == Role.ADMIN && adminDataLoaded) {
                 adminAuctionTable.setItems(FXCollections.observableArrayList(response.auctions()));
+                restoreSelectedAuction(adminAuctionTable);
             }
         });
     }
@@ -547,7 +555,18 @@ priceChart.getData().setAll(series);
     }
 
     private void handleAuctionEvent(AuctionEventDto event) {
-        loadAuctionLists();
+        if (event.summary() != null) {
+            updateAuctionTableRow(auctionTable, event.summary());
+            if (adminDataLoaded) {
+                updateAuctionTableRow(adminAuctionTable, event.summary());
+            }
+            if (sellerDataLoaded
+                    && AppContext.state().getCurrentUser().role() == Role.SELLER
+                    && sellerAuctionTable.getItems().stream()
+                    .anyMatch(auction -> auction.auctionId().equals(event.summary().auctionId()))) {
+                updateAuctionTableRow(sellerAuctionTable, event.summary());
+            }
+        }
         if (event.detail() != null && event.detail().auctionId().equals(selectedAuctionId)) {
             renderAuctionDetail(event.detail());
         }
@@ -556,6 +575,31 @@ priceChart.getData().setAll(series);
                 && event.summary().auctionId().equals(selectedAuctionId)) {
             clearDetail();
         }
+    }
+
+    private void updateAuctionTableRow(TableView<AuctionSummaryDto> table, AuctionSummaryDto updatedAuction) {
+        if (table == null || updatedAuction == null) {
+            return;
+        }
+        for (int index = 0; index < table.getItems().size(); index++) {
+            if (table.getItems().get(index).auctionId().equals(updatedAuction.auctionId())) {
+                table.getItems().set(index, updatedAuction);
+                restoreSelectedAuction(table);
+                return;
+            }
+        }
+        table.getItems().add(0, updatedAuction);
+        restoreSelectedAuction(table);
+    }
+
+    private void restoreSelectedAuction(TableView<AuctionSummaryDto> table) {
+        if (selectedAuctionId == null || table == null) {
+            return;
+        }
+        table.getItems().stream()
+                .filter(auction -> auction.auctionId().equals(selectedAuctionId))
+                .findFirst()
+                .ifPresent(auction -> table.getSelectionModel().select(auction));
     }
 
     private void updateSelectedSellerAuction(AuctionStatus status) {

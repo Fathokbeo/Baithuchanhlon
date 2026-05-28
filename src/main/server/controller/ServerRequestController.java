@@ -17,6 +17,7 @@ import main.shared.dto.PlaceBidRequest;
 import main.shared.dto.RegisterRequest;
 import main.shared.dto.SimpleResponse;
 import main.shared.dto.UpdateAuctionStatusRequest;
+import main.shared.dto.UpdateUserInfoRequest;
 import main.shared.dto.UpsertAuctionRequest;
 import main.shared.dto.UsersResponse;
 import main.shared.model.Auction;
@@ -53,6 +54,7 @@ public final class ServerRequestController {
                 case CONFIGURE_AUTO_BID -> handleConfigureAutoBid(session, request);
                 case UPDATE_AUCTION_STATUS -> handleUpdateStatus(session, request);
                 case LIST_USERS -> handleListUsers(session, request);
+                case UPDATE_USER_INFO -> handleUpdateUserInfo(session, request);
                 case AUCTION_CHANGED -> sendError(session, request, "Client khong the gui su kien realtime");
             }
         } catch (RuntimeException exception) {
@@ -169,6 +171,14 @@ public final class ServerRequestController {
         sendSuccess(session, request, new UsersResponse(authService.listUsers(user).stream()
                 .map(UserViewMapper::toRow)
                 .toList()));
+    }
+
+    private void handleUpdateUserInfo(ClientSession session, ApiMessage request) {
+        User user = requireUser(session);
+        UpdateUserInfoRequest payload = JsonUtils.fromJsonNode(request.getPayload(), UpdateUserInfoRequest.class);
+        User updatedUser = authService.updateUserInfo(user, payload.displayName(), payload.balance());
+        session.setAuthenticatedUser(updatedUser);
+        sendSuccess(session, request, new AuthResponse(UserViewMapper.toSessionUser(updatedUser), "Thong tin user da duoc luu"));
     }
 
     private User requireUser(ClientSession session) {

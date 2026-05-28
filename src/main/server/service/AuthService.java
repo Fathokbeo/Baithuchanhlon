@@ -49,6 +49,19 @@ public final class AuthService {
         return userDao.findAll();
     }
 
+    public User updateUserInfo(User user, String displayName, BigDecimal balance) {
+        if (displayName == null || displayName.isBlank()) {
+            throw new IllegalArgumentException("Ten hien thi khong duoc de trong");
+        }
+        if (balance == null || balance.signum() < 0) {
+            throw new IllegalArgumentException("So du khong hop le");
+        }
+        user.setDisplayName(displayName, LocalDateTime.now());
+        user.setBalance(balance, LocalDateTime.now());
+        userDao.save(user);
+        return user;
+    }
+
     public User getById(UUID userId) {
         return userDao.findById(userId)
                 .orElseThrow(() -> new IllegalArgumentException("Khong tim thay nguoi dung"));
