@@ -468,7 +468,9 @@ public final class DashboardController {
             itemImageView.setImage(new Image(new File(auction.imagePath()).toURI().toString()));
         }
         autoBidTable.setItems(FXCollections.observableArrayList(auction.autoBids()));
-       priceChart.setAnimated(false); 
+
+
+
 
 XYChart.Series<String, Number> series = new XYChart.Series<>();
 series.setName("Biến động giá");

@@ -35,7 +35,7 @@ public final class DataSeeder {
         }
         LocalDateTime now = LocalDateTime.now();
         Seller seller = new Seller(UUID.randomUUID(), now, now, "seller1", PasswordUtils.hash("seller123"), "Nguyen Seller", new BigDecimal("10000.00"));
-        Bidder bidder1 = new Bidder(UUID.randomUUID(), now, now, "bidder1", PasswordUtils.hash("bid123"), "Tran Bidder", new BigDecimal("5000.00"));
+        Bidder bidder1 = new Bidder(UUID.randomUUID(), now, now, "bidder1", PasswordUtils.hash("bid123"), "Tran Bidder", new BigDecimal("5000000000.00"));
         Bidder bidder2 = new Bidder(UUID.randomUUID(), now, now, "bidder2", PasswordUtils.hash("bid123"), "Le AutoBid", new BigDecimal("8000.00"));
         Admin admin = new Admin(UUID.randomUUID(), now, now, "admin", PasswordUtils.hash("admin123"), "System Admin", BigDecimal.ZERO);
 
