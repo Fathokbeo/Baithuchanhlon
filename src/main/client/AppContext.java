@@ -21,6 +21,7 @@ public final class AppContext {
     private static ClientSessionService clientSessionService;
     private static ClientState clientState;
     private static AuctionEmbeddedServer embeddedServer;
+    private static String serverHost = "127.0.0.1";
 
     private AppContext() {
     }
@@ -29,10 +30,15 @@ public final class AppContext {
         AppContext.embeddedServer = embeddedServer;
     }
 
+    public static void setServerHost(String host) {
+        AppContext.serverHost = host;
+    }
+
     public static void initialize(Stage stage) {
         primaryStage = stage;
         primaryStage.setTitle("Auction App");
-        connection = new AuctionClientConnection("127.0.0.1", DEFAULT_SERVER_PORT);
+        System.out.println("[Client] Ket noi toi server: " + serverHost + ":" + DEFAULT_SERVER_PORT);
+        connection = new AuctionClientConnection(serverHost, DEFAULT_SERVER_PORT);
         connection.connectWithRetry();
         clientSessionService = new ClientSessionService(connection);
         clientState = new ClientState();

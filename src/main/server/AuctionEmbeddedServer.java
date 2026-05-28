@@ -5,6 +5,7 @@ import main.server.dao.AuctionDao;
 import main.server.dao.DatabaseManager;
 import main.server.dao.UserDao;
 import main.server.net.AuctionSocketServer;
+import main.server.net.NetworkDiscovery;
 import main.server.net.SessionRegistry;
 import main.server.scheduler.AuctionLifecycleScheduler;
 import main.server.seed.DataSeeder;
@@ -17,6 +18,7 @@ public final class AuctionEmbeddedServer implements AutoCloseable {
 
     private AuctionSocketServer socketServer;
     private AuctionLifecycleScheduler lifecycleScheduler;
+    private Thread discoveryThread;
     private boolean startedByThisProcess;
 
     public boolean startIfNeeded() {
@@ -35,8 +37,10 @@ public final class AuctionEmbeddedServer implements AutoCloseable {
         socketServer = new AuctionSocketServer(DEFAULT_PORT, controller, sessionRegistry);
         startedByThisProcess = socketServer.start();
         if (startedByThisProcess) {
+            discoveryThread = NetworkDiscovery.startDiscoveryResponder();
             lifecycleScheduler = new AuctionLifecycleScheduler(auctionService, controller);
             lifecycleScheduler.start();
+            System.out.println("[Server] Server dang chay tren TCP port " + DEFAULT_PORT + " va UDP port " + NetworkDiscovery.DISCOVERY_PORT);
         }
         return startedByThisProcess;
     }
@@ -47,6 +51,9 @@ public final class AuctionEmbeddedServer implements AutoCloseable {
 
     @Override
     public void close() {
+        if (discoveryThread != null) {
+            discoveryThread.interrupt();
+        }
         if (lifecycleScheduler != null) {
             lifecycleScheduler.close();
         }
