@@ -34,9 +34,15 @@ public final class DataSeeder {
             return;
         }
         LocalDateTime now = LocalDateTime.now();
+<<<<<<< HEAD
         Seller seller = new Seller(UUID.randomUUID(), now, now, "seller1", PasswordUtils.hash("seller123"), "Nguyen Seller", new BigDecimal("10000.00"));
         Bidder bidder1 = new Bidder(UUID.randomUUID(), now, now, "bidder1", PasswordUtils.hash("bid123"), "Tran Bidder", new BigDecimal("5000000000.00"));
         Bidder bidder2 = new Bidder(UUID.randomUUID(), now, now, "bidder2", PasswordUtils.hash("bid123"), "Le AutoBid", new BigDecimal("8000.00"));
+=======
+        Seller seller = new Seller(UUID.randomUUID(), now, now, "seller1", PasswordUtils.hash("seller123"), "Nguyen Seller", new BigDecimal("13900.00"));
+        Bidder bidder1 = new Bidder(UUID.randomUUID(), now, now, "bidder1", PasswordUtils.hash("bid123"), "Tran Bidder", new BigDecimal("3350.00"));
+        Bidder bidder2 = new Bidder(UUID.randomUUID(), now, now, "bidder2", PasswordUtils.hash("bid123"), "Le AutoBid", new BigDecimal("4100.00"));
+>>>>>>> Hao
         Admin admin = new Admin(UUID.randomUUID(), now, now, "admin", PasswordUtils.hash("admin123"), "System Admin", BigDecimal.ZERO);
 
         List<User> users = List.of(seller, bidder1, bidder2, admin);
@@ -87,6 +93,8 @@ public final class DataSeeder {
                 now.plusMinutes(10),
                 0,
                 java.math.BigDecimal.ZERO,
+                true,
+                false,
                 List.of(bid),
                 List.of()
         );
@@ -166,6 +174,8 @@ public final class DataSeeder {
                 now.minusMinutes(65),
                 0,
                 java.math.BigDecimal.ZERO,
+                false,
+                true,
                 List.of(bid),
                 List.of()
         );

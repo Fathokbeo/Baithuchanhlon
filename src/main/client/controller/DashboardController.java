@@ -247,7 +247,7 @@ public final class DashboardController {
     @FXML
     private void handlePlaceBid() {
         if (selectedAuctionId == null) {
-            AlertHelper.error("Hay chon mot phien dau gia");
+            AlertHelper.error("Hãy chọn một phiên đấu giá");
             return;
         }
         runAction(AppContext.service().placeBid(new PlaceBidRequest(
@@ -257,14 +257,14 @@ public final class DashboardController {
                 response -> {
                     renderAuctionDetail(response.auction());
                     bidAmountField.clear();
-                    AlertHelper.info("Dat gia thanh cong");
+                    AlertHelper.info("Đặt giá thành công");
                 });
     }
 
     @FXML
     private void handleConfigureAutoBid() {
         if (selectedAuctionId == null) {
-            AlertHelper.error("Hay chon mot phien dau gia");
+            AlertHelper.error("Hãy chọn một phiên đấu giá");
             return;
         }
         runAction(AppContext.service().configureAutoBid(new ConfigureAutoBidRequest(
@@ -276,7 +276,7 @@ public final class DashboardController {
                     renderAuctionDetail(response.auction());
                     autoMaxBidField.clear();
                     autoIncrementField.clear();
-                    AlertHelper.info("Cap nhat auto-bid thanh cong");
+                    AlertHelper.info("Cập nhật auto-bid thành công");
                 });
     }
 
@@ -286,7 +286,7 @@ public final class DashboardController {
                 response -> {
                     loadAuctionLists();
                     renderAuctionDetail(response.auction());
-                    AlertHelper.info("Da tao phien dau gia");
+                    AlertHelper.info("Đã tạo phiên đấu giá");
                 }));
     }
 
@@ -294,7 +294,7 @@ public final class DashboardController {
     private void handleEditAuction() {
         AuctionSummaryDto selected = sellerAuctionTable.getSelectionModel().getSelectedItem();
         if (selected == null) {
-            AlertHelper.error("Hay chon mot phien dau gia cua ban");
+            AlertHelper.error("Hãy chọn một phiên đấu giá của bạn");
             return;
         }
         runAction(AppContext.service().getAuctionDetail(selected.auctionId()),
@@ -303,14 +303,14 @@ public final class DashboardController {
                         saved -> {
                             loadAuctionLists();
                             renderAuctionDetail(saved.auction());
-                            AlertHelper.info("Da cap nhat phien dau gia");
+                            AlertHelper.info("Đã cập nhật phiên đấu giá");
                         })));
     }
 
     @FXML
     private void handleDeleteAuction() {
         AuctionSummaryDto selected = sellerAuctionTable.getSelectionModel().getSelectedItem();
-        if (selected == null || !AlertHelper.confirm("Xoa phien dau gia da chon?")) {
+        if (selected == null || !AlertHelper.confirm("Xoá phiên đấu giá đã chọn?")) {
             return;
         }
         runAction(AppContext.service().deleteAuction(selected.auctionId()), response -> {
@@ -447,7 +447,7 @@ public final class DashboardController {
         detailCurrentPriceLabel.setText(MoneyUtils.display(auction.currentPrice()));
         detailMinRaiseLabel.setText(MoneyUtils.display(auction.minRaise() == null ? BigDecimal.ZERO : auction.minRaise()));
         detailItemInfoLabel.setText(auction.itemInfo());
-        detailExtensionLabel.setText("Gia han: " + auction.extensionCount() + " lan");
+        detailExtensionLabel.setText("Gia hạn: " + auction.extensionCount() + " lần");
         BigDecimal minRaise = auction.minRaise() == null ? BigDecimal.ZERO : auction.minRaise();
         if (AppContext.state().getCurrentUser().role() == Role.BIDDER) {
             if (minRaise.signum() > 0) {
@@ -489,14 +489,14 @@ priceChart.getData().setAll(series);
     private void clearDetail() {
         itemImageView.setImage(null);
         selectedAuctionId = null;
-        detailTitleLabel.setText("Chua chon phien dau gia");
+        detailTitleLabel.setText("Chưa chọn phiên đấu giá");
         detailStatusLabel.setText("-");
         detailSellerLabel.setText("-");
         detailTimeLabel.setText("-");
         detailLeadingLabel.setText("-");
         detailCurrentPriceLabel.setText("-");
         detailItemInfoLabel.setText("-");
-        detailExtensionLabel.setText("Gia han: 0 lan");
+        detailExtensionLabel.setText("Gia hạn: 0 lần");
         renderDescription("");
         bidHistoryTable.setItems(FXCollections.emptyObservableList());
         autoBidTable.setItems(FXCollections.emptyObservableList());
@@ -544,17 +544,18 @@ priceChart.getData().setAll(series);
     private void openLink(String rawUrl) {
         try {
             if (!Desktop.isDesktopSupported() || !Desktop.getDesktop().isSupported(Desktop.Action.BROWSE)) {
-                AlertHelper.error("May nay khong ho tro mo link tu ung dung");
+                AlertHelper.error("Máy này không hỗ trợ mở link từ ứng dụng");
                 return;
             }
             String normalizedUrl = rawUrl.startsWith("www.") ? "https://" + rawUrl : rawUrl;
             Desktop.getDesktop().browse(new URI(normalizedUrl));
         } catch (Exception exception) {
-            AlertHelper.error("Khong mo duoc link: " + rawUrl);
+            AlertHelper.error("Không mở được link: " + rawUrl);
         }
     }
 
     private void handleAuctionEvent(AuctionEventDto event) {
+        applyCurrentUser(event.currentUser());
         if (event.summary() != null) {
             updateAuctionTableRow(auctionTable, event.summary());
             if (adminDataLoaded) {
@@ -605,35 +606,35 @@ priceChart.getData().setAll(series);
     private void updateSelectedSellerAuction(AuctionStatus status) {
         AuctionSummaryDto selected = sellerAuctionTable.getSelectionModel().getSelectedItem();
         if (selected == null) {
-            AlertHelper.error("Hay chon mot phien dau gia cua ban");
+            AlertHelper.error("Hãy chọn một phiên đấu giá của bạn");
             return;
         }
         runAction(AppContext.service().updateAuctionStatus(new UpdateAuctionStatusRequest(selected.auctionId(), status)),
                 response -> {
                     renderAuctionDetail(response.auction());
                     loadAuctionLists();
-                    AlertHelper.info("Cap nhat trang thai thanh cong");
+                    AlertHelper.info("Cập nhật trạng thái thành công");
                 });
     }
 
     private void updateSelectedAdminAuction(AuctionStatus status) {
         AuctionSummaryDto selected = adminAuctionTable.getSelectionModel().getSelectedItem();
         if (selected == null) {
-            AlertHelper.error("Hay chon mot phien dau gia");
+            AlertHelper.error("Hãy chọn một phiên đấu giá");
             return;
         }
         runAction(AppContext.service().updateAuctionStatus(new UpdateAuctionStatusRequest(selected.auctionId(), status)),
                 response -> {
                     renderAuctionDetail(response.auction());
                     loadAuctionLists();
-                    AlertHelper.info("Cap nhat trang thai thanh cong");
+                    AlertHelper.info("Cập nhật trạng thái thành công");
                 });
     }
 
     private Optional<UpsertAuctionRequest> showAuctionForm(AuctionDetailDto auction) {
         Dialog<UpsertAuctionRequest> dialog = new Dialog<>();
-        dialog.setTitle(auction == null ? "Tao phien dau gia" : "Sua phien dau gia");
-        ButtonType saveButtonType = new ButtonType("Luu", ButtonBar.ButtonData.OK_DONE);
+        dialog.setTitle(auction == null ? "Tạo phiên đấu giá" : "Sửa phiên đấu giá");
+        ButtonType saveButtonType = new ButtonType("Lưu", ButtonBar.ButtonData.OK_DONE);
         dialog.getDialogPane().getButtonTypes().addAll(saveButtonType, ButtonType.CANCEL);
 
         ComboBox<ItemType> typeComboBox = new ComboBox<>(FXCollections.observableArrayList(ItemType.values()));
@@ -678,25 +679,25 @@ priceChart.getData().setAll(series);
         GridPane gridPane = new GridPane();
         gridPane.setHgap(12);
         gridPane.setVgap(12);
-        gridPane.add(new Label("Loai"), 0, 0);
+        gridPane.add(new Label("Loại"), 0, 0);
         gridPane.add(typeComboBox, 1, 0);
-        gridPane.add(new Label("Ten"), 0, 1);
+        gridPane.add(new Label("Tên"), 0, 1);
         gridPane.add(nameField, 1, 1);
-        gridPane.add(new Label("Gia khoi diem"), 0, 2);
+        gridPane.add(new Label("Giá khỏi điểm"), 0, 2);
         gridPane.add(priceField, 1, 2);
         gridPane.add(new Label("MinRaise ( Mức tăng tối thiểu)") , 0, 3);
         gridPane.add(minRaiseField, 1, 3);
-        gridPane.add(new Label("Bat dau"), 0, 4);
+        gridPane.add(new Label("Bắt đầu"), 0, 4);
         gridPane.add(startDatePicker, 1, 4);
-        gridPane.add(new Label("Gio bat dau"), 0, 5);
+        gridPane.add(new Label("Giờ bắt đầu"), 0, 5);
         gridPane.add(startTimeField, 1, 5);
-        gridPane.add(new Label("Ket thuc"), 0, 6);
+        gridPane.add(new Label("Kết thúc"), 0, 6);
         gridPane.add(endDatePicker, 1, 6);
-        gridPane.add(new Label("Gio ket thuc"), 0, 7);
+        gridPane.add(new Label("Giờ kết thúc"), 0, 7);
         gridPane.add(endTimeField, 1, 7);
-        gridPane.add(new Label("Thong so them"), 0, 8);
+        gridPane.add(new Label("Thông số thêm"), 0, 8);
         gridPane.add(specialField, 1, 8);
-        gridPane.add(new Label("Mo ta"), 0, 9);
+        gridPane.add(new Label("Mô tả"), 0, 9);
         gridPane.add(descriptionField, 1, 9);
         dialog.getDialogPane().setContent(gridPane);
 
@@ -723,29 +724,48 @@ priceChart.getData().setAll(series);
     }
 
     private <T> void runAction(java.util.concurrent.CompletableFuture<T> future, Consumer<T> onSuccess) {
-        future.thenAccept(result -> Platform.runLater(() -> onSuccess.accept(result)))
+        future.thenAccept(result -> Platform.runLater(() -> {
+                    applyResponseCurrentUser(result);
+                    onSuccess.accept(result);
+                }))
                 .exceptionally(throwable -> {
                     Platform.runLater(() -> AlertHelper.error(extractMessage(throwable)));
                     return null;
                 });
     }
 
+    private void applyResponseCurrentUser(Object result) {
+        if (result instanceof AuctionDetailResponse response) {
+            applyCurrentUser(response.currentUser());
+        }
+    }
+
+    private void applyCurrentUser(SessionUserDto user) {
+        SessionUserDto currentUser = AppContext.state().getCurrentUser();
+        if (user == null || currentUser == null || !user.id().equals(currentUser.id())) {
+            return;
+        }
+        AppContext.state().setCurrentUser(user);
+        userLabel.setText(user.displayName() + " (" + user.role() + ")");
+        balanceLabel.setText("Số dư: " + MoneyUtils.display(user.balance()));
+    }
+
     private String extractMessage(Throwable throwable) {
         Throwable cause = throwable instanceof CompletionException && throwable.getCause() != null
                 ? throwable.getCause()
                 : throwable;
-        return cause.getMessage() == null ? "Co loi xay ra" : cause.getMessage();
+        return cause.getMessage() == null ? "Có lỗi xảy ra" : cause.getMessage();
     }
 
     private BigDecimal parseAmount(String rawValue) {
         String normalized = rawValue == null ? "" : rawValue.trim().replace(".", "").replace(",", "");
         if (normalized.isEmpty()) {
-            throw new IllegalArgumentException("Vui long nhap so tien hop le");
+            throw new IllegalArgumentException("Vui lòng nhập số tiền hợp lệ");
         }
         try {
             return new BigDecimal(normalized);
         } catch (NumberFormatException exception) {
-            throw new IllegalArgumentException("Vui long nhap so tien hop le");
+            throw new IllegalArgumentException("Vui lòng nhập số tiền hợp lệ");
         }
     }
 }

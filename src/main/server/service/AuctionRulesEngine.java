@@ -25,9 +25,6 @@ public final class AuctionRulesEngine {
         auction.refreshLifecycle(now);
         BigDecimal normalizedAmount = MoneyUtils.normalize(amount);
         ensureAuctionRunning(auction, now);
-        if (normalizedAmount.compareTo(bidder.getBalance()) > 0) {
-            throw new IllegalArgumentException("Số tiền bid không được vượt quá số dư trong ví");
-        }
         if (normalizedAmount.compareTo(auction.getCurrentPrice()) <= 0) {
             throw new IllegalArgumentException("Gia dau phai cao hon gia hien tai");
         }

@@ -77,6 +77,8 @@ public final class DatabaseManager {
                         winner_bidder_id varchar(36),
                         winner_bidder_name varchar(120),
                         status varchar(20) not null,
+                        bidder_wallet_charged boolean not null default false,
+                        seller_wallet_paid boolean not null default false,
                         start_time timestamp not null,
                         end_time timestamp not null,
                         extension_count int not null,
@@ -91,6 +93,16 @@ public final class DatabaseManager {
             }
             try {
                 statement.execute("alter table auctions add column min_rate decimal(19,2) not null default 0");
+            } catch (SQLException ignored) {
+                // Column already exists.
+            }
+            try {
+                statement.execute("alter table auctions add column bidder_wallet_charged boolean not null default false");
+            } catch (SQLException ignored) {
+                // Column already exists.
+            }
+            try {
+                statement.execute("alter table auctions add column seller_wallet_paid boolean not null default false");
             } catch (SQLException ignored) {
                 // Column already exists.
             }

@@ -13,6 +13,8 @@ public final class Auction extends Entity {
     private UUID winnerBidderId;
     private String winnerBidderName;
     private AuctionStatus status;
+    private boolean bidderWalletCharged;
+    private boolean sellerWalletPaid;
     private LocalDateTime startTime;
     private LocalDateTime endTime;
     private int extensionCount;
@@ -39,6 +41,50 @@ public final class Auction extends Entity {
             List<BidTransaction> bidHistory,
             List<AutoBidConfig> autoBidConfigs
     ) {
+        this(
+                id,
+                createdAt,
+                updatedAt,
+                item,
+                sellerId,
+                currentPrice,
+                leadingBidderId,
+                leadingBidderName,
+                winnerBidderId,
+                winnerBidderName,
+                status,
+                startTime,
+                endTime,
+                extensionCount,
+                minRaise,
+                false,
+                false,
+                bidHistory,
+                autoBidConfigs
+        );
+    }
+
+    public Auction(
+            UUID id,
+            LocalDateTime createdAt,
+            LocalDateTime updatedAt,
+            Item item,
+            UUID sellerId,
+            BigDecimal currentPrice,
+            UUID leadingBidderId,
+            String leadingBidderName,
+            UUID winnerBidderId,
+            String winnerBidderName,
+            AuctionStatus status,
+            LocalDateTime startTime,
+            LocalDateTime endTime,
+            int extensionCount,
+            BigDecimal minRaise,
+            boolean bidderWalletCharged,
+            boolean sellerWalletPaid,
+            List<BidTransaction> bidHistory,
+            List<AutoBidConfig> autoBidConfigs
+    ) {
         super(id, createdAt, updatedAt);
         this.item = Objects.requireNonNull(item, "item");
         this.sellerId = Objects.requireNonNull(sellerId, "sellerId");
@@ -48,6 +94,8 @@ public final class Auction extends Entity {
         this.winnerBidderId = winnerBidderId;
         this.winnerBidderName = winnerBidderName;
         this.status = Objects.requireNonNull(status, "status");
+        this.bidderWalletCharged = bidderWalletCharged;
+        this.sellerWalletPaid = sellerWalletPaid;
         this.startTime = Objects.requireNonNull(startTime, "startTime");
         this.endTime = Objects.requireNonNull(endTime, "endTime");
         this.extensionCount = extensionCount;
@@ -97,6 +145,20 @@ public final class Auction extends Entity {
 
     public void setStatus(AuctionStatus status, LocalDateTime timestamp) {
         this.status = Objects.requireNonNull(status, "status");
+        touch(timestamp);
+    }
+
+    public boolean isBidderWalletCharged() {
+        return bidderWalletCharged;
+    }
+
+    public boolean isSellerWalletPaid() {
+        return sellerWalletPaid;
+    }
+
+    public void setWalletState(boolean bidderWalletCharged, boolean sellerWalletPaid, LocalDateTime timestamp) {
+        this.bidderWalletCharged = bidderWalletCharged;
+        this.sellerWalletPaid = sellerWalletPaid;
         touch(timestamp);
     }
 
