@@ -121,8 +121,9 @@ public final class AuctionDao {
                 merge into auctions (
                     id, seller_id, item_id, item_type, item_name, item_description, item_image_path, starting_price,
                     current_price, special_field, leading_bidder_id, leading_bidder_name, winner_bidder_id,
-                    winner_bidder_name, status, start_time, end_time, extension_count, min_rate, created_at, updated_at
-                ) values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                    winner_bidder_name, status, bidder_wallet_charged, seller_wallet_paid, start_time, end_time,
+                    extension_count, min_rate, created_at, updated_at
+                ) values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                 """)) {
    Item item = auction.getItem();
    statement.setString(1, auction.getId().toString());
@@ -140,12 +141,14 @@ public final class AuctionDao {
    statement.setString(13, auction.getWinnerBidderId() == null ? null : auction.getWinnerBidderId().toString());
    statement.setString(14, auction.getWinnerBidderName());
    statement.setString(15, auction.getStatus().name());
-   statement.setTimestamp(16, Timestamp.valueOf(auction.getStartTime()));
-   statement.setTimestamp(17, Timestamp.valueOf(auction.getEndTime()));
-   statement.setInt(18, auction.getExtensionCount());
-   statement.setBigDecimal(19, auction.getMinRaise());
-   statement.setTimestamp(20, Timestamp.valueOf(auction.getCreatedAt()));
-   statement.setTimestamp(21, Timestamp.valueOf(auction.getUpdatedAt()));
+   statement.setBoolean(16, auction.isBidderWalletCharged());
+   statement.setBoolean(17, auction.isSellerWalletPaid());
+   statement.setTimestamp(18, Timestamp.valueOf(auction.getStartTime()));
+   statement.setTimestamp(19, Timestamp.valueOf(auction.getEndTime()));
+   statement.setInt(20, auction.getExtensionCount());
+   statement.setBigDecimal(21, auction.getMinRaise());
+   statement.setTimestamp(22, Timestamp.valueOf(auction.getCreatedAt()));
+   statement.setTimestamp(23, Timestamp.valueOf(auction.getUpdatedAt()));
    statement.executeUpdate();
   }
  }
@@ -238,6 +241,8 @@ public final class AuctionDao {
           resultSet.getTimestamp("end_time").toLocalDateTime(),
           resultSet.getInt("extension_count"),
           resultSet.getBigDecimal("min_rate"),
+          resultSet.getBoolean("bidder_wallet_charged"),
+          resultSet.getBoolean("seller_wallet_paid"),
           loadBids(connection, auctionId),
           loadAutoBids(connection, auctionId)
   );

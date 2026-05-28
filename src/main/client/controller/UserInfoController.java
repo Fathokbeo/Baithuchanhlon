@@ -86,16 +86,16 @@ public final class UserInfoController {
     private BigDecimal parseAmount(String rawValue) {
         String normalized = rawValue == null ? "" : rawValue.trim().replace(".", "").replace(",", "");
         if (normalized.isEmpty()) {
-            throw new IllegalArgumentException("Vui long nhap so du");
+            throw new IllegalArgumentException("Vui lòng nhập số dư");
         }
         try {
             BigDecimal amount = new BigDecimal(normalized);
             if (amount.signum() < 0) {
-                throw new IllegalArgumentException("So du khong duoc am");
+                throw new IllegalArgumentException("Số dư không đươc âm");
             }
             return amount;
         } catch (NumberFormatException exception) {
-            throw new IllegalArgumentException("So du khong hop le");
+            throw new IllegalArgumentException("Số dư không hợp lệ");
         }
     }
 
@@ -103,6 +103,6 @@ public final class UserInfoController {
         Throwable cause = throwable instanceof CompletionException && throwable.getCause() != null
                 ? throwable.getCause()
                 : throwable;
-        return cause.getMessage() == null ? "Co loi xay ra" : cause.getMessage();
+        return cause.getMessage() == null ? "Có lỗi xảy ra" : cause.getMessage();
     }
 }

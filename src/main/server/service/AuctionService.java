@@ -14,14 +14,18 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
 public final class AuctionService {
+    private static final BigDecimal ZERO = BigDecimal.ZERO.setScale(2);
+
     private final AuctionDao auctionDao;
     private final UserDao userDao;
     private final AuctionRulesEngine rulesEngine;
@@ -36,6 +40,7 @@ public final class AuctionService {
             auctions.put(auction.getId(), auction);
             locks.put(auction.getId(), new ReentrantLock());
         });
+        reconcileWalletStateOnStartup(LocalDateTime.now());
     }
 
     public List<Auction> listAuctions() {
@@ -126,6 +131,7 @@ public final class AuctionService {
             auction.setEndTime(request.endTime(), now);
             auction.setMinRaise(minRaise, now);
             auction.setLeader(null, null, MoneyUtils.normalize(request.startingPrice()), now);
+            auction.setWalletState(false, false, now);
             auction.setStatus(now.isBefore(request.startTime()) ? AuctionStatus.OPEN : AuctionStatus.RUNNING, now);
             auction.refreshLifecycle(now);
             auctionDao.saveSnapshot(auction);
@@ -154,9 +160,19 @@ public final class AuctionService {
         Lock lock = lockOf(auctionId);
         lock.lock();
         try {
-            rulesEngine.placeManualBid(auction, bidder, amount, now);
-            auctionDao.saveSnapshot(auction);
-            return auction;
+            UUID previousLeaderId = auction.getLeadingBidderId();
+            BigDecimal previousPrice = auction.getCurrentPrice();
+            boolean previousCharged = auction.isBidderWalletCharged();
+            validateManualBidFunds(auction, bidder, amount, previousLeaderId, previousPrice, previousCharged);
+            try {
+                rulesEngine.placeManualBid(auction, bidder, amount, now);
+                syncBidWalletHold(auction, previousLeaderId, previousPrice, previousCharged, now, bidder);
+                auctionDao.saveSnapshot(auction);
+                return auction;
+            } catch (RuntimeException exception) {
+                rollbackAuction(auctionId);
+                throw exception;
+            }
         } finally {
             lock.unlock();
         }
@@ -167,9 +183,22 @@ public final class AuctionService {
         Lock lock = lockOf(auctionId);
         lock.lock();
         try {
-            rulesEngine.configureAutoBid(auction, bidder, maxBid, increment, now);
-            auctionDao.saveSnapshot(auction);
-            return auction;
+            UUID previousLeaderId = auction.getLeadingBidderId();
+            BigDecimal previousPrice = auction.getCurrentPrice();
+            boolean previousCharged = auction.isBidderWalletCharged();
+            int previousBidCount = auction.getBidHistory().size();
+            validateAutoBidFunds(auction, bidder, maxBid);
+            try {
+                rulesEngine.configureAutoBid(auction, bidder, maxBid, increment, now);
+                if (walletRelevantChange(auction, previousLeaderId, previousPrice, previousBidCount)) {
+                    syncBidWalletHold(auction, previousLeaderId, previousPrice, previousCharged, now, bidder);
+                }
+                auctionDao.saveSnapshot(auction);
+                return auction;
+            } catch (RuntimeException exception) {
+                rollbackAuction(auctionId);
+                throw exception;
+            }
         } finally {
             lock.unlock();
         }
@@ -183,15 +212,28 @@ public final class AuctionService {
         Lock lock = lockOf(auctionId);
         lock.lock();
         try {
-            if (status == AuctionStatus.PAID) {
-                auction.markPaid(now);
-            } else if (status == AuctionStatus.CANCELED) {
-                auction.cancel(now);
-            } else {
-                throw new IllegalArgumentException("Chi ho tro chuyen sang PAID hoac CANCELED");
+            try {
+                if (status == AuctionStatus.PAID) {
+                    if (auction.getStatus() != AuctionStatus.FINISHED) {
+                        throw new IllegalStateException("Only finished auctions can be marked as paid");
+                    }
+                    settleSellerPayout(auction, now, true, actor);
+                    auction.markPaid(now);
+                } else if (status == AuctionStatus.CANCELED) {
+                    if (auction.isSellerWalletPaid()) {
+                        throw new IllegalStateException("Phien da thanh toan cho seller nen khong the huy");
+                    }
+                    auction.cancel(now);
+                    refundBidWalletHold(auction, now, actor);
+                } else {
+                    throw new IllegalArgumentException("Chi ho tro chuyen sang PAID hoac CANCELED");
+                }
+                auctionDao.saveSnapshot(auction);
+                return auction;
+            } catch (RuntimeException exception) {
+                rollbackAuction(auctionId);
+                throw exception;
             }
-            auctionDao.saveSnapshot(auction);
-            return auction;
         } finally {
             lock.unlock();
         }
@@ -204,6 +246,13 @@ public final class AuctionService {
             lock.lock();
             try {
                 if (rulesEngine.refreshLifecycle(auction, now)) {
+                    if (auction.getStatus() == AuctionStatus.FINISHED) {
+                        try {
+                            settleSellerPayout(auction, now, true);
+                        } catch (RuntimeException exception) {
+                            System.err.println("Cannot settle wallet for auction " + auction.getId() + ": " + exception.getMessage());
+                        }
+                    }
                     auctionDao.saveSnapshot(auction);
                     changed.add(auction);
                 }
@@ -218,6 +267,192 @@ public final class AuctionService {
         return userDao.findById(auction.getSellerId())
                 .map(User::getDisplayName)
                 .orElse("Unknown Seller");
+    }
+
+    private void validateManualBidFunds(
+            Auction auction,
+            User bidder,
+            BigDecimal amount,
+            UUID previousLeaderId,
+            BigDecimal previousPrice,
+            boolean previousCharged
+    ) {
+        BigDecimal normalizedAmount = MoneyUtils.normalize(amount);
+        User freshBidder = loadUser(bidder.getId());
+        BigDecimal requiredBalance = normalizedAmount;
+        if (previousCharged && bidder.getId().equals(previousLeaderId)) {
+            requiredBalance = normalizedAmount.subtract(previousPrice);
+        }
+        if (requiredBalance.signum() < 0) {
+            requiredBalance = ZERO;
+        }
+        if (freshBidder.getBalance().compareTo(requiredBalance) < 0) {
+            throw new IllegalArgumentException("So tien bid vuot qua so du kha dung trong vi");
+        }
+    }
+
+    private void validateAutoBidFunds(Auction auction, User bidder, BigDecimal maxBid) {
+        BigDecimal normalizedMaxBid = MoneyUtils.normalize(maxBid);
+        User freshBidder = loadUser(bidder.getId());
+        BigDecimal buyingPower = freshBidder.getBalance();
+        if (auction.isBidderWalletCharged()
+                && bidder.getId().equals(auction.getLeadingBidderId())) {
+            buyingPower = buyingPower.add(auction.getCurrentPrice());
+        }
+        if (normalizedMaxBid.compareTo(buyingPower) > 0) {
+            throw new IllegalArgumentException("MaxBid vuot qua so du kha dung trong vi");
+        }
+    }
+
+    private boolean walletRelevantChange(
+            Auction auction,
+            UUID previousLeaderId,
+            BigDecimal previousPrice,
+            int previousBidCount
+    ) {
+        return previousBidCount != auction.getBidHistory().size()
+                || !Objects.equals(previousLeaderId, auction.getLeadingBidderId())
+                || previousPrice.compareTo(auction.getCurrentPrice()) != 0;
+    }
+
+    private void syncBidWalletHold(
+            Auction auction,
+            UUID previousLeaderId,
+            BigDecimal previousPrice,
+            boolean previousCharged,
+            LocalDateTime now,
+            User... sessionUsers
+    ) {
+        Map<UUID, BigDecimal> deltas = new HashMap<>();
+        if (previousCharged && previousLeaderId != null) {
+            addDelta(deltas, previousLeaderId, previousPrice);
+        }
+        if (auction.getLeadingBidderId() != null) {
+            addDelta(deltas, auction.getLeadingBidderId(), auction.getCurrentPrice().negate());
+        }
+        applyWalletDeltas(deltas, now, sessionUsers);
+        auction.setWalletState(auction.getLeadingBidderId() != null, false, now);
+    }
+
+    private boolean refundBidWalletHold(Auction auction, LocalDateTime now, User... sessionUsers) {
+        if (!auction.isBidderWalletCharged() || auction.getLeadingBidderId() == null) {
+            return false;
+        }
+        Map<UUID, BigDecimal> deltas = new HashMap<>();
+        addDelta(deltas, auction.getLeadingBidderId(), auction.getCurrentPrice());
+        applyWalletDeltas(deltas, now, sessionUsers);
+        auction.setWalletState(false, auction.isSellerWalletPaid(), now);
+        return true;
+    }
+
+    private boolean settleSellerPayout(
+            Auction auction,
+            LocalDateTime now,
+            boolean chargeWinnerIfNeeded,
+            User... sessionUsers
+    ) {
+        if (auction.isSellerWalletPaid() || auction.getWinnerBidderId() == null) {
+            return false;
+        }
+        Map<UUID, BigDecimal> deltas = new HashMap<>();
+        if (!auction.isBidderWalletCharged()) {
+            if (!chargeWinnerIfNeeded) {
+                return false;
+            }
+            addDelta(deltas, auction.getWinnerBidderId(), auction.getCurrentPrice().negate());
+        }
+        addDelta(deltas, auction.getSellerId(), auction.getCurrentPrice());
+        applyWalletDeltas(deltas, now, sessionUsers);
+        auction.setWalletState(false, true, now);
+        return true;
+    }
+
+    private void reconcileWalletStateOnStartup(LocalDateTime now) {
+        for (Auction auction : auctions.values()) {
+            try {
+                boolean changed = false;
+                if ((auction.getStatus() == AuctionStatus.OPEN || auction.getStatus() == AuctionStatus.RUNNING)
+                        && auction.getLeadingBidderId() != null
+                        && !auction.isBidderWalletCharged()
+                        && !auction.isSellerWalletPaid()) {
+                    Map<UUID, BigDecimal> deltas = new HashMap<>();
+                    addDelta(deltas, auction.getLeadingBidderId(), auction.getCurrentPrice().negate());
+                    applyWalletDeltas(deltas, now);
+                    auction.setWalletState(true, false, now);
+                    changed = true;
+                }
+                if ((auction.getStatus() == AuctionStatus.FINISHED || auction.getStatus() == AuctionStatus.PAID)
+                        && !auction.isSellerWalletPaid()) {
+                    changed = settleSellerPayout(auction, now, true) || changed;
+                }
+                if (auction.getStatus() == AuctionStatus.CANCELED && auction.isBidderWalletCharged()) {
+                    changed = refundBidWalletHold(auction, now) || changed;
+                }
+                if (changed) {
+                    auctionDao.saveSnapshot(auction);
+                }
+            } catch (RuntimeException exception) {
+                System.err.println("Cannot reconcile wallet for auction " + auction.getId() + ": " + exception.getMessage());
+            }
+        }
+    }
+
+    private void applyWalletDeltas(Map<UUID, BigDecimal> deltas, LocalDateTime now, User... sessionUsers) {
+        if (deltas.isEmpty()) {
+            return;
+        }
+        Map<UUID, User> users = new HashMap<>();
+        Map<UUID, BigDecimal> nextBalances = new HashMap<>();
+        for (Map.Entry<UUID, BigDecimal> entry : deltas.entrySet()) {
+            BigDecimal delta = MoneyUtils.normalize(entry.getValue());
+            if (delta.signum() == 0) {
+                continue;
+            }
+            User user = loadUser(entry.getKey());
+            BigDecimal nextBalance = MoneyUtils.normalize(user.getBalance().add(delta));
+            if (nextBalance.signum() < 0) {
+                throw new IllegalStateException("So du trong vi cua " + user.getDisplayName() + " khong du");
+            }
+            users.put(entry.getKey(), user);
+            nextBalances.put(entry.getKey(), nextBalance);
+        }
+        for (Map.Entry<UUID, User> entry : users.entrySet()) {
+            User user = entry.getValue();
+            user.setBalance(nextBalances.get(entry.getKey()), now);
+            userDao.save(user);
+        }
+        syncSessionUsers(users, sessionUsers);
+    }
+
+    private void addDelta(Map<UUID, BigDecimal> deltas, UUID userId, BigDecimal delta) {
+        if (userId == null || delta == null || delta.signum() == 0) {
+            return;
+        }
+        deltas.merge(userId, MoneyUtils.normalize(delta), BigDecimal::add);
+    }
+
+    private void syncSessionUsers(Map<UUID, User> updatedUsers, User... sessionUsers) {
+        if (sessionUsers == null) {
+            return;
+        }
+        for (User sessionUser : sessionUsers) {
+            if (sessionUser == null) {
+                continue;
+            }
+            User updatedUser = updatedUsers.get(sessionUser.getId());
+            if (updatedUser != null) {
+                sessionUser.setBalance(updatedUser.getBalance(), updatedUser.getUpdatedAt());
+            }
+        }
+    }
+
+    private User loadUser(UUID userId) {
+        return userDao.findById(userId)
+                .orElseThrow(() -> new IllegalArgumentException("Khong tim thay nguoi dung"));
+    }
+
+    private void rollbackAuction(UUID auctionId) {
+        auctionDao.findById(auctionId).ifPresent(stored -> auctions.put(auctionId, stored));
     }
 
     private void ensureSeller(User seller) {

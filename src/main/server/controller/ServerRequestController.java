@@ -15,6 +15,7 @@ import main.shared.dto.ConfigureAutoBidRequest;
 import main.shared.dto.LoginRequest;
 import main.shared.dto.PlaceBidRequest;
 import main.shared.dto.RegisterRequest;
+import main.shared.dto.SessionUserDto;
 import main.shared.dto.SimpleResponse;
 import main.shared.dto.UpdateAuctionStatusRequest;
 import main.shared.dto.UpdateUserInfoRequest;
@@ -64,19 +65,19 @@ public final class ServerRequestController {
 
     public void broadcastAuctionChange(Auction auction, String eventName) {
         String sellerName = auctionService.sellerName(auction);
-        AuctionEventDto event = new AuctionEventDto(
-                eventName,
-                AuctionViewMapper.toSummary(auction, sellerName),
-                AuctionViewMapper.toDetail(auction, sellerName)
-        );
-        sessionRegistry.broadcast(JsonUtils.write(new ApiMessage(
-                MessageCategory.EVENT,
-                MessageType.AUCTION_CHANGED,
-                null,
-                true,
-                null,
-                JsonUtils.toJsonNode(event)
-        )));
+        var summary = AuctionViewMapper.toSummary(auction, sellerName);
+        var detail = AuctionViewMapper.toDetail(auction, sellerName);
+        sessionRegistry.forEach(session -> {
+            AuctionEventDto event = new AuctionEventDto(eventName, summary, detail, refreshCurrentUser(session));
+            session.send(new ApiMessage(
+                    MessageCategory.EVENT,
+                    MessageType.AUCTION_CHANGED,
+                    null,
+                    true,
+                    null,
+                    JsonUtils.toJsonNode(event)
+            ));
+        });
     }
 
     private void handleLogin(ClientSession session, ApiMessage request) {
@@ -111,18 +112,14 @@ public final class ServerRequestController {
         requireUser(session);
         AuctionIdRequest payload = JsonUtils.fromJsonNode(request.getPayload(), AuctionIdRequest.class);
         Auction auction = auctionService.getAuction(payload.auctionId());
-        sendSuccess(session, request, new AuctionDetailResponse(
-                AuctionViewMapper.toDetail(auction, auctionService.sellerName(auction))
-        ));
+        sendAuctionDetail(session, request, auction);
     }
 
     private void handleUpsertAuction(ClientSession session, ApiMessage request) {
         User user = requireUser(session);
         UpsertAuctionRequest payload = JsonUtils.fromJsonNode(request.getPayload(), UpsertAuctionRequest.class);
         Auction auction = auctionService.saveAuction(user, payload, LocalDateTime.now());
-        sendSuccess(session, request, new AuctionDetailResponse(
-                AuctionViewMapper.toDetail(auction, auctionService.sellerName(auction))
-        ));
+        sendAuctionDetail(session, request, auction);
         broadcastAuctionChange(auction, payload.auctionId() == null ? "CREATED" : "UPDATED");
     }
 
@@ -139,9 +136,7 @@ public final class ServerRequestController {
         User user = requireUser(session);
         PlaceBidRequest payload = JsonUtils.fromJsonNode(request.getPayload(), PlaceBidRequest.class);
         Auction auction = auctionService.placeBid(user, payload.auctionId(), payload.amount(), LocalDateTime.now());
-        sendSuccess(session, request, new AuctionDetailResponse(
-                AuctionViewMapper.toDetail(auction, auctionService.sellerName(auction))
-        ));
+        sendAuctionDetail(session, request, auction);
         broadcastAuctionChange(auction, "BID_PLACED");
     }
 
@@ -150,9 +145,7 @@ public final class ServerRequestController {
         ConfigureAutoBidRequest payload = JsonUtils.fromJsonNode(request.getPayload(), ConfigureAutoBidRequest.class);
         Auction auction = auctionService.configureAutoBid(user, payload.auctionId(), payload.maxBid(), payload.increment(),
                 LocalDateTime.now());
-        sendSuccess(session, request, new AuctionDetailResponse(
-                AuctionViewMapper.toDetail(auction, auctionService.sellerName(auction))
-        ));
+        sendAuctionDetail(session, request, auction);
         broadcastAuctionChange(auction, "AUTO_BID_UPDATED");
     }
 
@@ -160,9 +153,7 @@ public final class ServerRequestController {
         User user = requireUser(session);
         UpdateAuctionStatusRequest payload = JsonUtils.fromJsonNode(request.getPayload(), UpdateAuctionStatusRequest.class);
         Auction auction = auctionService.updateStatus(user, payload.auctionId(), payload.status(), LocalDateTime.now());
-        sendSuccess(session, request, new AuctionDetailResponse(
-                AuctionViewMapper.toDetail(auction, auctionService.sellerName(auction))
-        ));
+        sendAuctionDetail(session, request, auction);
         broadcastAuctionChange(auction, "STATUS_UPDATED");
     }
 
@@ -194,6 +185,23 @@ public final class ServerRequestController {
             throw new IllegalStateException("Ban can dang nhap truoc");
         }
         return user;
+    }
+
+    private void sendAuctionDetail(ClientSession session, ApiMessage request, Auction auction) {
+        sendSuccess(session, request, new AuctionDetailResponse(
+                AuctionViewMapper.toDetail(auction, auctionService.sellerName(auction)),
+                refreshCurrentUser(session)
+        ));
+    }
+
+    private SessionUserDto refreshCurrentUser(ClientSession session) {
+        User currentUser = session.getAuthenticatedUser();
+        if (currentUser == null) {
+            return null;
+        }
+        User freshUser = authService.getById(currentUser.getId());
+        session.setAuthenticatedUser(freshUser);
+        return UserViewMapper.toSessionUser(freshUser);
     }
 
     private void sendSuccess(ClientSession session, ApiMessage request, Object payload) {
