@@ -377,13 +377,15 @@ public final class AuctionService {
                         && !auction.isSellerWalletPaid()) {
                     Map<UUID, BigDecimal> deltas = new HashMap<>();
                     addDelta(deltas, auction.getLeadingBidderId(), auction.getCurrentPrice().negate());
-                    applyWalletDeltas(deltas, now);
-                    auction.setWalletState(true, false, now);
-                    changed = true;
+                    if (canApplyWalletDeltas(deltas)) {
+                        applyWalletDeltas(deltas, now);
+                        auction.setWalletState(true, false, now);
+                        changed = true;
+                    }
                 }
                 if ((auction.getStatus() == AuctionStatus.FINISHED || auction.getStatus() == AuctionStatus.PAID)
                         && !auction.isSellerWalletPaid()) {
-                    changed = settleSellerPayout(auction, now, true) || changed;
+                    changed = settleSellerPayout(auction, now, false) || changed;
                 }
                 if (auction.getStatus() == AuctionStatus.CANCELED && auction.isBidderWalletCharged()) {
                     changed = refundBidWalletHold(auction, now) || changed;
@@ -395,6 +397,20 @@ public final class AuctionService {
                 System.err.println("Cannot reconcile wallet for auction " + auction.getId() + ": " + exception.getMessage());
             }
         }
+    }
+
+    private boolean canApplyWalletDeltas(Map<UUID, BigDecimal> deltas) {
+        for (Map.Entry<UUID, BigDecimal> entry : deltas.entrySet()) {
+            BigDecimal delta = MoneyUtils.normalize(entry.getValue());
+            if (delta.signum() == 0) {
+                continue;
+            }
+            User user = loadUser(entry.getKey());
+            if (MoneyUtils.normalize(user.getBalance().add(delta)).signum() < 0) {
+                return false;
+            }
+        }
+        return true;
     }
 
     private void applyWalletDeltas(Map<UUID, BigDecimal> deltas, LocalDateTime now, User... sessionUsers) {

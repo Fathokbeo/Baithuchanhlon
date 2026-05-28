@@ -68,6 +68,7 @@ public final class ServerRequestController {
         var summary = AuctionViewMapper.toSummary(auction, sellerName);
         var detail = AuctionViewMapper.toDetail(auction, sellerName);
         sessionRegistry.forEach(session -> {
+            if (session.getAuthenticatedUser() == null) return;
             AuctionEventDto event = new AuctionEventDto(eventName, summary, detail, refreshCurrentUser(session));
             session.send(new ApiMessage(
                     MessageCategory.EVENT,

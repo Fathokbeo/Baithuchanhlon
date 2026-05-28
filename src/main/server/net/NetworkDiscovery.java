@@ -1,5 +1,6 @@
 package main.server.net;
 
+import java.io.Closeable;
 import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
@@ -8,6 +9,7 @@ import java.net.InterfaceAddress;
 import java.net.NetworkInterface;
 import java.nio.charset.StandardCharsets;
 import java.util.Collections;
+import java.util.concurrent.atomic.AtomicReference;
 
 public final class NetworkDiscovery {
     public static final int DISCOVERY_PORT = 5556;
@@ -51,15 +53,17 @@ public final class NetworkDiscovery {
                 }
             } catch (IOException ignored) {}
 
-            // Chờ phản hồi
+            // Chờ phản hồi — loop để bỏ qua gói UDP lạ, chỉ dừng khi nhận đúng PONG
             byte[] buffer = new byte[64];
-            DatagramPacket response = new DatagramPacket(buffer, buffer.length);
-            socket.receive(response);
-            String msg = new String(response.getData(), 0, response.getLength(), StandardCharsets.UTF_8);
-            if (PONG.equals(msg)) {
-                String serverIp = response.getAddress().getHostAddress();
-                System.out.println("[Discovery] Tim thay server tai: " + serverIp);
-                return serverIp;
+            while (true) {
+                DatagramPacket response = new DatagramPacket(buffer, buffer.length);
+                socket.receive(response);
+                String msg = new String(response.getData(), 0, response.getLength(), StandardCharsets.UTF_8);
+                if (PONG.equals(msg)) {
+                    String serverIp = response.getAddress().getHostAddress();
+                    System.out.println("[Discovery] Tim thay server tai: " + serverIp);
+                    return serverIp;
+                }
             }
         } catch (IOException ignored) {
             // Hết timeout hoặc lỗi mạng → không tìm thấy server
@@ -72,12 +76,18 @@ public final class NetworkDiscovery {
      * Khởi động UDP responder để client trên LAN có thể tìm thấy server này.
      * Server sẽ tự động trả lời PONG khi nhận được PING.
      */
-    public static Thread startDiscoveryResponder() {
+    /**
+     * Trả về Closeable: gọi close() để dừng responder và giải phóng UDP port.
+     */
+    public static Closeable startDiscoveryResponder() {
+        // AtomicReference để tránh race condition khi close() gọi trước thread kịp gán socket
+        AtomicReference<DatagramSocket> socketRef = new AtomicReference<>();
         Thread thread = new Thread(() -> {
             try (DatagramSocket socket = new DatagramSocket(DISCOVERY_PORT)) {
+                socketRef.set(socket);
                 System.out.println("[Discovery] Discovery responder da san sang tren UDP port " + DISCOVERY_PORT);
                 byte[] buffer = new byte[64];
-                while (!Thread.currentThread().isInterrupted()) {
+                while (!socket.isClosed()) {
                     DatagramPacket packet = new DatagramPacket(buffer, buffer.length);
                     socket.receive(packet);
                     String msg = new String(packet.getData(), 0, packet.getLength(), StandardCharsets.UTF_8);
@@ -89,13 +99,20 @@ public final class NetworkDiscovery {
                     }
                 }
             } catch (IOException e) {
-                if (!Thread.currentThread().isInterrupted()) {
+                DatagramSocket s = socketRef.get();
+                if (s == null || !s.isClosed()) {
                     System.err.println("[Discovery] Discovery responder da dung: " + e.getMessage());
                 }
             }
         }, "auction-discovery-responder");
         thread.setDaemon(true);
         thread.start();
-        return thread;
+        return () -> {
+            DatagramSocket s = socketRef.get();
+            if (s != null) {
+                s.close();
+            }
+            thread.interrupt();
+        };
     }
 }
