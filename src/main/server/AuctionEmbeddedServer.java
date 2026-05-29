@@ -48,7 +48,7 @@ public final class AuctionEmbeddedServer implements AutoCloseable {
             discoveryResponder = NetworkDiscovery.startDiscoveryResponder();
             lifecycleScheduler = new AuctionLifecycleScheduler(auctionService, controller);
             lifecycleScheduler.start();
-            System.out.println("[Server] Server dang chay tren TCP port " + DEFAULT_PORT + " va UDP port " + NetworkDiscovery.DISCOVERY_PORT);
+            System.out.println("[Server] Server đang chạy trên TCP port " + DEFAULT_PORT + " và UDP port " + NetworkDiscovery.DISCOVERY_PORT);
         }
         return startedByThisProcess;
     }

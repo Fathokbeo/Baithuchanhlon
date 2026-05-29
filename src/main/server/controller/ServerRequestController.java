@@ -56,7 +56,7 @@ public final class ServerRequestController {
                 case UPDATE_AUCTION_STATUS -> handleUpdateStatus(session, request);
                 case LIST_USERS -> handleListUsers(session, request);
                 case UPDATE_USER_INFO -> handleUpdateUserInfo(session, request);
-                case AUCTION_CHANGED -> sendError(session, request, "Client khong the gui su kien realtime");
+                case AUCTION_CHANGED -> sendError(session, request, "Client không thể gửi sự kiện realtime");
             }
         } catch (RuntimeException exception) {
             sendError(session, request, exception.getMessage());
@@ -85,14 +85,14 @@ public final class ServerRequestController {
         LoginRequest payload = JsonUtils.fromJsonNode(request.getPayload(), LoginRequest.class);
         User user = authService.login(payload.username(), payload.password());
         session.setAuthenticatedUser(user);
-        sendSuccess(session, request, new AuthResponse(UserViewMapper.toSessionUser(user), "Dang nhap thanh cong"));
+        sendSuccess(session, request, new AuthResponse(UserViewMapper.toSessionUser(user), "Đăng nhập thành công"));
     }
 
     private void handleRegister(ClientSession session, ApiMessage request) {
         RegisterRequest payload = JsonUtils.fromJsonNode(request.getPayload(), RegisterRequest.class);
         User user = authService.register(payload.username(), payload.password(), payload.displayName(), payload.role());
         session.setAuthenticatedUser(user);
-        sendSuccess(session, request, new AuthResponse(UserViewMapper.toSessionUser(user), "Dang ky thanh cong"));
+        sendSuccess(session, request, new AuthResponse(UserViewMapper.toSessionUser(user), "Đăng ký thành công"));
     }
 
     private void handleListAuctions(ClientSession session, ApiMessage request) {
@@ -129,7 +129,7 @@ public final class ServerRequestController {
         AuctionIdRequest payload = JsonUtils.fromJsonNode(request.getPayload(), AuctionIdRequest.class);
         Auction auction = auctionService.getAuction(payload.auctionId());
         auctionService.deleteAuction(user, payload.auctionId());
-        sendSuccess(session, request, new SimpleResponse("Da xoa phien dau gia"));
+        sendSuccess(session, request, new SimpleResponse("Đã xoá phiên đấu giá"));
         broadcastAuctionChange(auction, "DELETED");
     }
 
@@ -183,7 +183,7 @@ public final class ServerRequestController {
     private User requireUser(ClientSession session) {
         User user = session.getAuthenticatedUser();
         if (user == null) {
-            throw new IllegalStateException("Ban can dang nhap truoc");
+            throw new IllegalStateException("Bạn cần đăng nhập trước");
         }
         return user;
     }
@@ -222,7 +222,7 @@ public final class ServerRequestController {
                 request.getType(),
                 request.getRequestId(),
                 false,
-                errorMessage == null ? "Co loi xay ra" : errorMessage,
+                errorMessage == null ? "Có lỗi xảy ra" : errorMessage,
                 null
         ));
     }

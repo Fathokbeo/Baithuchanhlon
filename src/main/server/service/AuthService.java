@@ -22,15 +22,15 @@ public final class AuthService {
     public User login(String username, String password) {
         return userDao.findByUsername(username)
                 .filter(user -> PasswordUtils.matches(password, user.getPasswordHash()))
-                .orElseThrow(() -> new IllegalArgumentException("Sai ten dang nhap hoac mat khau"));
+                .orElseThrow(() -> new IllegalArgumentException("Sai tên đăng nhập hoặc mật khẩu"));
     }
 
     public User register(String username, String password, String displayName, Role role) {
         if (role == Role.ADMIN) {
-            throw new IllegalArgumentException("Khong the tu dang ky tai khoan admin");
+            throw new IllegalArgumentException("Không thể tự đăng ký tài khoản admin");
         }
         userDao.findByUsername(username).ifPresent(existing -> {
-            throw new IllegalArgumentException("Ten dang nhap da ton tai");
+            throw new IllegalArgumentException("Tên đăng nhập đã tồn tại");
         });
         LocalDateTime now = LocalDateTime.now();
         User user = switch (role) {
@@ -44,17 +44,17 @@ public final class AuthService {
 
     public List<User> listUsers(User requester) {
         if (requester.getRole() != Role.ADMIN) {
-            throw new IllegalStateException("Chi admin moi xem duoc danh sach nguoi dung");
+            throw new IllegalStateException("Chỉ admin mới xem được danh sách người dùng");
         }
         return userDao.findAll();
     }
 
     public User updateUserInfo(User user, String displayName, BigDecimal balance, String email, String phone, String address) {
         if (displayName == null || displayName.isBlank()) {
-            throw new IllegalArgumentException("Ten hien thi khong duoc de trong");
+            throw new IllegalArgumentException("Tên hiển thị không được để trống");
         }
         if (balance == null || balance.signum() < 0) {
-            throw new IllegalArgumentException("So du khong hop le");
+            throw new IllegalArgumentException("Số dư không hợp lệ");
         }
         LocalDateTime now = LocalDateTime.now();
         user.setDisplayName(displayName, now);
@@ -66,6 +66,6 @@ public final class AuthService {
 
     public User getById(UUID userId) {
         return userDao.findById(userId)
-                .orElseThrow(() -> new IllegalArgumentException("Khong tim thay nguoi dung"));
+                .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy người dùng"));
     }
 }

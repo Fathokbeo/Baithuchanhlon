@@ -61,14 +61,14 @@ public final class NetworkDiscovery {
                 String msg = new String(response.getData(), 0, response.getLength(), StandardCharsets.UTF_8);
                 if (PONG.equals(msg)) {
                     String serverIp = response.getAddress().getHostAddress();
-                    System.out.println("[Discovery] Tim thay server tai: " + serverIp);
+                    System.out.println("[Discovery] Tìm thấy server tải: " + serverIp);
                     return serverIp;
                 }
             }
         } catch (IOException ignored) {
             // Hết timeout hoặc lỗi mạng → không tìm thấy server
         }
-        System.out.println("[Discovery] Khong tim thay server tren mang, se khoi dong server cuc bo.");
+        System.out.println("[Discovery] Không tìm thấy server trên mạng, sẽ khỏi động server cục bộ.");
         return null;
     }
 
@@ -85,7 +85,7 @@ public final class NetworkDiscovery {
         Thread thread = new Thread(() -> {
             try (DatagramSocket socket = new DatagramSocket(DISCOVERY_PORT)) {
                 socketRef.set(socket);
-                System.out.println("[Discovery] Discovery responder da san sang tren UDP port " + DISCOVERY_PORT);
+                System.out.println("[Discovery] Discovery responder đã sẵn sàng trên UDP port " + DISCOVERY_PORT);
                 byte[] buffer = new byte[64];
                 while (!socket.isClosed()) {
                     DatagramPacket packet = new DatagramPacket(buffer, buffer.length);
@@ -101,7 +101,7 @@ public final class NetworkDiscovery {
             } catch (IOException e) {
                 DatagramSocket s = socketRef.get();
                 if (s == null || !s.isClosed()) {
-                    System.err.println("[Discovery] Discovery responder da dung: " + e.getMessage());
+                    System.err.println("[Discovery] Discovery responder đa dụng: " + e.getMessage());
                 }
             }
         }, "auction-discovery-responder");

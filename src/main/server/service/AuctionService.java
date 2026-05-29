@@ -60,7 +60,7 @@ public final class AuctionService {
     public Auction getAuction(UUID auctionId) {
         Auction auction = auctions.get(auctionId);
         if (auction == null) {
-            throw new IllegalArgumentException("Khong tim thay phien dau gia");
+            throw new IllegalArgumentException("Không tìm thấy phiên đấu giá");
         }
         return auction;
     }
@@ -71,7 +71,7 @@ public final class AuctionService {
                 request.specialField());
         BigDecimal minRaise = request.minRaise() == null ? BigDecimal.ZERO : MoneyUtils.normalize(request.minRaise());
         if (minRaise.signum() < 0) {
-            throw new IllegalArgumentException("MinRaise khong duoc am");
+            throw new IllegalArgumentException("MinRaise không được âm");
         }
         if (request.auctionId() == null) {
             UUID auctionId = UUID.randomUUID();
@@ -114,10 +114,10 @@ public final class AuctionService {
         }
         Auction auction = getAuction(request.auctionId());
         if (!auction.getSellerId().equals(seller.getId())) {
-            throw new IllegalStateException("Ban khong co quyen sua phien dau gia nay");
+            throw new IllegalStateException("Bạn không có quyền sửa phiên đấu giá này");
         }
         if (!auction.canEdit()) {
-            throw new IllegalStateException("Khong the sua phien da co bid hoac da ket thuc");
+            throw new IllegalStateException("Không thể sửa phiên đã có bid hoặc đã kết thúc");
         }
         Lock lock = lockOf(auction.getId());
         lock.lock();
@@ -145,10 +145,10 @@ public final class AuctionService {
         ensureSeller(seller);
         Auction auction = getAuction(auctionId);
         if (!auction.getSellerId().equals(seller.getId())) {
-            throw new IllegalStateException("Ban khong co quyen xoa phien dau gia nay");
+            throw new IllegalStateException("Bạn không có quyền xoá phiên đấu giá này");
         }
         if (!auction.canEdit()) {
-            throw new IllegalStateException("Chi xoa duoc phien chua co bid");
+            throw new IllegalStateException("Chỉ xoá được phiên chưa có bid");
         }
         auctions.remove(auctionId);
         locks.remove(auctionId);
@@ -207,7 +207,7 @@ public final class AuctionService {
     public Auction updateStatus(User actor, UUID auctionId, AuctionStatus status, LocalDateTime now) {
         Auction auction = getAuction(auctionId);
         if (actor.getRole() != Role.ADMIN && !auction.getSellerId().equals(actor.getId())) {
-            throw new IllegalStateException("Ban khong co quyen cap nhat trang thai");
+            throw new IllegalStateException("Bạn không có quyền cập nhật trạng thái");
         }
         Lock lock = lockOf(auctionId);
         lock.lock();
@@ -221,12 +221,12 @@ public final class AuctionService {
                     auction.markPaid(now);
                 } else if (status == AuctionStatus.CANCELED) {
                     if (auction.isSellerWalletPaid()) {
-                        throw new IllegalStateException("Phien da thanh toan cho seller nen khong the huy");
+                        throw new IllegalStateException("Phiên đã thanh toán cho seller nên không thể hủy");
                     }
                     auction.cancel(now);
                     refundBidWalletHold(auction, now, actor);
                 } else {
-                    throw new IllegalArgumentException("Chi ho tro chuyen sang PAID hoac CANCELED");
+                    throw new IllegalArgumentException("Chỉ hỗ trợ chuyển sang PAID hoặc CANCELED");
                 }
                 auctionDao.saveSnapshot(auction);
                 return auction;
@@ -287,7 +287,7 @@ public final class AuctionService {
             requiredBalance = ZERO;
         }
         if (freshBidder.getBalance().compareTo(requiredBalance) < 0) {
-            throw new IllegalArgumentException("So tien bid vuot qua so du kha dung trong vi");
+            throw new IllegalArgumentException("Số tiền bid vượt quá số dư khả dụng trong ví");
         }
     }
 
@@ -300,7 +300,7 @@ public final class AuctionService {
             buyingPower = buyingPower.add(auction.getCurrentPrice());
         }
         if (normalizedMaxBid.compareTo(buyingPower) > 0) {
-            throw new IllegalArgumentException("MaxBid vuot qua so du kha dung trong vi");
+            throw new IllegalArgumentException("MaxBid vượt quá số dư khả dụng trong ví");
         }
     }
 
@@ -427,7 +427,7 @@ public final class AuctionService {
             User user = loadUser(entry.getKey());
             BigDecimal nextBalance = MoneyUtils.normalize(user.getBalance().add(delta));
             if (nextBalance.signum() < 0) {
-                throw new IllegalStateException("So du trong vi cua " + user.getDisplayName() + " khong du");
+                throw new IllegalStateException("Số dư trong ví cua " + user.getDisplayName() + " không đủ");
             }
             users.put(entry.getKey(), user);
             nextBalances.put(entry.getKey(), nextBalance);
@@ -464,7 +464,7 @@ public final class AuctionService {
 
     private User loadUser(UUID userId) {
         return userDao.findById(userId)
-                .orElseThrow(() -> new IllegalArgumentException("Khong tim thay nguoi dung"));
+                .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy người dùng"));
     }
 
     private void rollbackAuction(UUID auctionId) {
@@ -473,7 +473,7 @@ public final class AuctionService {
 
     private void ensureSeller(User seller) {
         if (seller.getRole() != Role.SELLER && seller.getRole() != Role.ADMIN) {
-            throw new IllegalStateException("Chi seller/admin moi duoc quan ly san pham");
+            throw new IllegalStateException("Chỉ seller/admin mới được quản lý sản phẩm");
         }
     }
 
@@ -488,13 +488,13 @@ public final class AuctionService {
         if (name == null || name.isBlank()
                 || description == null || description.isBlank()
                 || specialField == null || specialField.isBlank()) {
-            throw new IllegalArgumentException("Thong tin san pham khong duoc de trong");
+            throw new IllegalArgumentException("Thông tin sản phẩm không được để trống");
         }
         if (startingPrice == null || startingPrice.signum() < 0) {
-            throw new IllegalArgumentException("Gia khoi diem khong hop le");
+            throw new IllegalArgumentException("Giá khởi điểm không hợp lệ");
         }
         if (startTime == null || endTime == null || !endTime.isAfter(startTime)) {
-            throw new IllegalArgumentException("Thoi gian dau gia khong hop le");
+            throw new IllegalArgumentException("Thời gian đấu giá không hợp lệ");
         }
     }
 

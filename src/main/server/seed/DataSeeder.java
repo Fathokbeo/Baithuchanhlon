@@ -55,10 +55,10 @@ public final class DataSeeder {
                 now.minusMinutes(5),
                 seller.getId(),
                 "MacBook Pro M4",
-                "Laptop phuc vu developer, RAM 24GB, SSD 1TB.",
+                "Laptop phục vụ developer, RAM 24GB, SSD 1TB.",
                 null,
                 new BigDecimal("1500.00"),
-                "Apple | Bao hanh 12 thang"
+                "Apple | Bảo hành 12 tháng"
         );
         BidTransaction bid = new BidTransaction(
                 UUID.randomUUID(),
@@ -101,11 +101,11 @@ public final class DataSeeder {
                 now,
                 now,
                 seller.getId(),
-                "Tranh Son Dau Pho Co",
-                "Tac pham son dau chu de pho co Ha Noi, khung go lim.",
+                "Tranh Sơn Dầu Phố Cổ",
+                "Tác phẩm sơn dầu chủ đề phố cổ Hà Nội, khung gỗ lim.",
                 null,
                 new BigDecimal("800.00"),
-                "Hoa si noi dia | Canvas 80x120"
+                "Họa sĩ nội địa | Canvas 80x120"
         );
         return new Auction(
                 UUID.randomUUID(),
@@ -136,7 +136,7 @@ public final class DataSeeder {
                 now.minusHours(2),
                 seller.getId(),
                 "Honda SH 150i 2024",
-                "Xe moi 95%, odo 3.500 km, chinh chu.",
+                "Xe mới 95%, odo 3.500 km, chính chủ.",
                 null,
                 new BigDecimal("3500.00"),
                 "SH 150i | 3.500km"

@@ -9,7 +9,7 @@ public final class AuctionServerMain {
     public static void main(String[] args) throws InterruptedException {
         AuctionEmbeddedServer server = new AuctionEmbeddedServer();
         if (!server.startIfNeeded()) {
-            System.err.println("Server da dang chay tren cong 5555.");
+            System.err.println("Server đang chạy trên cổng 5555.");
             return;
         }
         Runtime.getRuntime().addShutdownHook(new Thread(server::close));

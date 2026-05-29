@@ -26,11 +26,11 @@ public final class AuctionRulesEngine {
         BigDecimal normalizedAmount = MoneyUtils.normalize(amount);
         ensureAuctionRunning(auction, now);
         if (normalizedAmount.compareTo(auction.getCurrentPrice()) <= 0) {
-            throw new IllegalArgumentException("Gia dau phai cao hon gia hien tai");
+            throw new IllegalArgumentException("Giá đấu phải cao hơn giá hiện tại");
         }
         BigDecimal minRaise = auction.getMinRaise();
         if (minRaise.signum() > 0 && normalizedAmount.compareTo(auction.getCurrentPrice().add(minRaise)) < 0) {
-            throw new IllegalArgumentException("Muc tang gia toi thieu la " + minRaise.toPlainString());
+            throw new IllegalArgumentException("Mức tăng giá tối thiểu là " + minRaise.toPlainString());
         }
         auction.addBid(createBid(auction, bidder, normalizedAmount, now, BidSource.MANUAL), now);
         applyAntiSniping(auction, now);
@@ -43,19 +43,19 @@ public final class AuctionRulesEngine {
         if (auction.getStatus() == AuctionStatus.FINISHED
                 || auction.getStatus() == AuctionStatus.PAID
                 || auction.getStatus() == AuctionStatus.CANCELED) {
-            throw new IllegalStateException("Phien dau gia da dong");
+            throw new IllegalStateException("Phiên đấu giá đã đóng");
         }
         BigDecimal normalizedMax = MoneyUtils.normalize(maxBid);
         BigDecimal normalizedIncrement = MoneyUtils.normalize(increment);
         if (normalizedIncrement.signum() <= 0) {
-            throw new IllegalArgumentException("Buoc gia phai lon hon 0");
+            throw new IllegalArgumentException("Bước giá phải lớn hơn 0");
         }
         BigDecimal minRaise = auction.getMinRaise();
         if (minRaise.signum() > 0 && normalizedIncrement.compareTo(minRaise) < 0) {
-            throw new IllegalArgumentException("Increment toi thieu la " + minRaise.toPlainString());
+            throw new IllegalArgumentException("Increment tối thiểu là " + minRaise.toPlainString());
         }
         if (normalizedMax.compareTo(auction.getCurrentPrice()) <= 0) {
-            throw new IllegalArgumentException("maxBid phai cao hon gia hien tai");
+            throw new IllegalArgumentException("maxBid phải cao hơn giá hiện tại");
         }
         AutoBidConfig config = auction.findAutoBid(bidder.getId())
                 .map(existing -> {
@@ -89,22 +89,22 @@ public final class AuctionRulesEngine {
 
     private void validateBidder(Auction auction, User bidder) {
         if (bidder.getRole() != Role.BIDDER) {
-            throw new IllegalStateException("Chi bidder moi co the dat gia");
+            throw new IllegalStateException("Chỉ bidder mới có thể đặt giá");
         }
         if (auction.getSellerId().equals(bidder.getId())) {
-            throw new IllegalStateException("Seller khong duoc tu dau gia san pham cua minh");
+            throw new IllegalStateException("Seller không được tự đấu giá sản phẩm của mình");
         }
     }
 
     private void ensureAuctionRunning(Auction auction, LocalDateTime now) {
         if (auction.getStatus() == AuctionStatus.OPEN && now.isBefore(auction.getStartTime())) {
-            throw new IllegalStateException("Phien dau gia chua bat dau");
+            throw new IllegalStateException("Phiên đấu giá chưa bắt đầu");
         }
         if (auction.getStatus() != AuctionStatus.RUNNING) {
-            throw new IllegalStateException("Phien dau gia da dong");
+            throw new IllegalStateException("Phiên đấu giá đã đóng");
         }
         if (!now.isBefore(auction.getEndTime())) {
-            throw new IllegalStateException("Phien dau gia da het han");
+            throw new IllegalStateException("Phiên đấu giá đã hết hạn");
         }
     }
 
