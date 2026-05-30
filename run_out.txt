@@ -1,0 +1,2 @@
+[Server] Server dang chay tren TCP port 5555 va UDP port 5556
+[Discovery] Discovery responder da san sang tren UDP port 5556

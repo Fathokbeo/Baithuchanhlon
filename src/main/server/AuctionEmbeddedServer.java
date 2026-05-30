@@ -16,9 +16,13 @@ import main.server.service.AuthService;
 import java.io.Closeable;
 import java.io.IOException;
 import java.net.ServerSocket;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.concurrent.TimeUnit;
 
 public final class AuctionEmbeddedServer implements AutoCloseable {
     public static final int DEFAULT_PORT = 5555;
+    private static final Path PID_FILE = Path.of("./data/server.pid");
 
     private AuctionSocketServer socketServer;
     private AuctionLifecycleScheduler lifecycleScheduler;
@@ -27,7 +31,9 @@ public final class AuctionEmbeddedServer implements AutoCloseable {
 
     public boolean startIfNeeded() {
         if (!isPortAvailable(DEFAULT_PORT)) {
-            return false;
+            if (!killPreviousInstance()) {
+                return false;
+            }
         }
 
         DatabaseManager databaseManager = DatabaseManager.getInstance();
@@ -45,12 +51,53 @@ public final class AuctionEmbeddedServer implements AutoCloseable {
         socketServer = new AuctionSocketServer(DEFAULT_PORT, controller, sessionRegistry);
         startedByThisProcess = socketServer.start();
         if (startedByThisProcess) {
+            writePidFile();
             discoveryResponder = NetworkDiscovery.startDiscoveryResponder();
             lifecycleScheduler = new AuctionLifecycleScheduler(auctionService, controller);
             lifecycleScheduler.start();
             System.out.println("[Server] Server đang chạy trên TCP port " + DEFAULT_PORT + " và UDP port " + NetworkDiscovery.DISCOVERY_PORT);
         }
         return startedByThisProcess;
+    }
+
+    private static boolean killPreviousInstance() {
+        if (!Files.exists(PID_FILE)) {
+            System.err.println("[Server] Port " + DEFAULT_PORT + " đang bị chiếm bởi tiến trình khác (không phải server này).");
+            return false;
+        }
+        try {
+            long pid = Long.parseLong(Files.readString(PID_FILE).strip());
+            var handle = ProcessHandle.of(pid);
+            if (handle.isEmpty()) {
+                Files.deleteIfExists(PID_FILE);
+                return isPortAvailable(DEFAULT_PORT);
+            }
+            System.out.println("[Server] Đang dừng instance cũ (PID " + pid + ")...");
+            handle.get().destroyForcibly();
+            handle.get().onExit().get(5, TimeUnit.SECONDS);
+            Files.deleteIfExists(PID_FILE);
+            for (int i = 0; i < 25; i++) {
+                if (isPortAvailable(DEFAULT_PORT)) {
+                    return true;
+                }
+                Thread.sleep(200);
+            }
+            System.err.println("[Server] Port " + DEFAULT_PORT + " vẫn chưa được giải phóng sau khi dừng instance cũ.");
+            return false;
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            return false;
+        } catch (Exception e) {
+            System.err.println("[Server] Không thể dừng instance cũ: " + e.getMessage());
+            return false;
+        }
+    }
+
+    private static void writePidFile() {
+        try {
+            Files.createDirectories(PID_FILE.getParent());
+            Files.writeString(PID_FILE, String.valueOf(ProcessHandle.current().pid()));
+        } catch (IOException ignored) {}
     }
 
     private static boolean isPortAvailable(int port) {
@@ -78,5 +125,8 @@ public final class AuctionEmbeddedServer implements AutoCloseable {
         if (socketServer != null) {
             socketServer.close();
         }
+        try {
+            Files.deleteIfExists(PID_FILE);
+        } catch (IOException ignored) {}
     }
 }

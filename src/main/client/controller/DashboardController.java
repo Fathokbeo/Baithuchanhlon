@@ -475,15 +475,17 @@ public final class DashboardController {
 XYChart.Series<String, Number> series = new XYChart.Series<>();
 series.setName("Biến động giá");
 
-// 2. Thêm Null Check để tránh văng Exception ngầm
 if (auction.priceHistory() != null) {
-    auction.priceHistory().forEach(point -> series.getData().add(
-            new XYChart.Data<>(TimeUtils.chartLabel(point.timestamp()), point.amount())
-    ));
+    java.util.Map<String, Integer> labelCount = new java.util.LinkedHashMap<>();
+    for (main.shared.dto.PricePointDto point : auction.priceHistory()) {
+        String base = TimeUtils.chartLabel(point.timestamp());
+        int seq = labelCount.merge(base, 1, Integer::sum);
+        String label = seq == 1 ? base : base + "(" + seq + ")";
+        series.getData().add(new XYChart.Data<>(label, point.amount()));
+    }
 }
 
-// 3. Set dữ liệu an toàn
-priceChart.getData().setAll(series);
+priceChart.getData().setAll(java.util.List.of(series));
     }
 
     private void clearDetail() {

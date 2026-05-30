@@ -118,6 +118,7 @@ public final class AuctionRulesEngine {
 
     private void resolveAutoBidCompetition(Auction auction, LocalDateTime now) {
         boolean changed;
+        int autoBidSeq = 0;
         do {
             changed = false;
             List<AutoBidConfig> orderedConfigs = auction.getAutoBidConfigs().stream()
@@ -129,8 +130,9 @@ public final class AuctionRulesEngine {
                 BigDecimal nextBid = auction.getCurrentPrice().add(config.getIncrement());
                 BigDecimal actualBid = config.getMaxBid().min(nextBid);
                 if (actualBid.compareTo(auction.getCurrentPrice()) > 0) {
+                    LocalDateTime autoBidTime = now.plusSeconds(++autoBidSeq);
                     User systemProxy = new ProxyBidder(config.getBidderId(), config.getBidderName());
-                    auction.addBid(createBid(auction, systemProxy, actualBid, now, BidSource.AUTO), now);
+                    auction.addBid(createBid(auction, systemProxy, actualBid, autoBidTime, BidSource.AUTO), autoBidTime);
                     changed = true;
                     continue;
                 }
