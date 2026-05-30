@@ -1,2 +1,0 @@
-[Server] Server ?ang ch?y trên TCP port 5555 và UDP port 5556
-[Discovery] Discovery responder ?ã s?n sàng trên UDP port 5556
