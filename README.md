@@ -201,6 +201,6 @@ Lưu ý: trong source hiện tại chưa thấy thư mục `src/test`, nên cầ
 
 ## 11. Link báo cáo và video demo
 
-- Báo cáo PDF: cập nhật link tại đây.
-- Video demo: cập nhật link tại đây.
+- Báo cáo PDF: https://cdn.fbsbx.com/v/t59.2708-21/711865104_1317000897079312_8215701372063761960_n.pdf/main.pdf?_nc_cat=100&ccb=1-7&_nc_sid=2b0e22&_nc_eui2=AeFr3-q9_M7stg2U5Ww-oOU4zgNxm1aFJpfOA3GbVoUml8pzP7h0U0111G0XY1zGkpki55BCbfKhxKnAbBHRNDUd&_nc_ohc=ux5BkqvZRxAQ7kNvwFtWoPJ&_nc_oc=AdqS49lrraOckBdfKgbIBj8nZnW-zVTw_7SPO8R8c9uMWMiw8Ss2lz7-ZCTsuqkWQIQ&_nc_ad=z-m&_nc_cid=0&_nc_zt=7&_nc_ht=cdn.fbsbx.com&_nc_gid=MNI7yyt7wEGcvw3FdCBi0w&_nc_ss=7a338&oh=03_Q7cD5gE6WZCpYoUQWvgrOBvfNOOStqemdn6zBdwX9ZZHyMTIqA&oe=6A1DA2A5&dl=1
+- Video demo: https://drive.google.com/file/d/1e0S4CCrZUaEvGzxQQlAKe3JsDSAx9pSQ/view?usp=drivesdk
 
