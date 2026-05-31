@@ -64,7 +64,7 @@ public final class AuctionClientConnection implements AutoCloseable {
             readerThread.setDaemon(true);
             readerThread.start();
         } catch (IOException exception) {
-            throw new IllegalStateException("Khong the ket noi toi server", exception);
+            throw new IllegalStateException("Không thể kết nối tới server", exception);
         }
     }
 

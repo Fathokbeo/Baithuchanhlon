@@ -37,7 +37,7 @@ public final class AppContext {
     public static void initialize(Stage stage) {
         primaryStage = stage;
         primaryStage.setTitle("Auction App");
-        System.out.println("[Client] Ket noi toi server: " + serverHost + ":" + DEFAULT_SERVER_PORT);
+        System.out.println("[Client] Kết nối tới server: " + serverHost + ":" + DEFAULT_SERVER_PORT);
         connection = new AuctionClientConnection(serverHost, DEFAULT_SERVER_PORT);
         connection.connectWithRetry();
         clientSessionService = new ClientSessionService(connection);
