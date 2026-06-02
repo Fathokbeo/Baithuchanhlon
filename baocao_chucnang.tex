@@ -1,0 +1,531 @@
+\documentclass[12pt,a4paper]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[vietnamese]{babel}
+\usepackage[T5]{fontenc}
+\usepackage{geometry}
+\usepackage{booktabs}
+\usepackage{longtable}
+\usepackage{array}
+\usepackage{enumitem}
+\usepackage{xcolor}
+\usepackage{titlesec}
+\usepackage{hyperref}
+\usepackage{fancyhdr}
+\usepackage{graphicx}
+\usepackage{listings}
+\usepackage{parskip}
+
+\geometry{margin=2.5cm, top=3cm, bottom=3cm}
+
+% Colors
+\definecolor{mandatorycolor}{RGB}{30,100,180}
+\definecolor{optionalcolor}{RGB}{0,140,80}
+\definecolor{codeblue}{RGB}{0,0,160}
+\definecolor{codegray}{RGB}{100,100,100}
+\definecolor{codered}{RGB}{180,0,0}
+
+% Section formatting
+\titleformat{\section}{\large\bfseries\color{mandatorycolor}}{}{0em}{}[\titlerule]
+\titleformat{\subsection}{\normalsize\bfseries}{}{0em}{}
+
+% Code listing style
+\lstset{
+  basicstyle=\small\ttfamily,
+  keywordstyle=\color{codeblue}\bfseries,
+  commentstyle=\color{codegray},
+  stringstyle=\color{codered},
+  breaklines=true,
+  frame=single,
+  backgroundcolor=\color{gray!5},
+  language=Java
+}
+
+% Header / Footer
+\pagestyle{fancy}
+\fancyhf{}
+\lhead{\small Hệ thống Đấu giá Trực tuyến}
+\rhead{\small Báo cáo Chức năng}
+\cfoot{\thepage}
+
+% Helpers
+\newcommand{\score}[1]{\textbf{[#1 điểm]}}
+\newcommand{\mandatory}{\textcolor{mandatorycolor}{\textbf{Bắt buộc}}}
+\newcommand{\optional}{\textcolor{optionalcolor}{\textbf{Tuỳ chọn}}}
+\newcommand{\filepath}[1]{\texttt{\small #1}}
+
+% ──────────────────────────────────────────────────────────────────────────────
+\begin{document}
+
+\begin{titlepage}
+  \centering
+  \vspace*{2cm}
+  {\Huge\bfseries Hệ thống Đấu giá Trực tuyến\par}
+  \vspace{0.5cm}
+  {\large\itshape Auction Management System\par}
+  \vspace{1.5cm}
+  \rule{0.6\linewidth}{0.5pt}\\[0.4cm]
+  {\large Báo cáo Chức năng theo Barem Điểm\par}
+  \rule{0.6\linewidth}{0.5pt}\\[1.5cm]
+
+  \begin{tabular}{ll}
+    \textbf{Công nghệ:} & Java 21, JavaFX 21, H2 Database, Maven 3 \\[4pt]
+    \textbf{Kiến trúc:} & Client–Server, MVC, TCP Socket + JSON \\[4pt]
+    \textbf{Tổng điểm:} & 10 (bắt buộc) + 1 (tuỳ chọn) \\
+  \end{tabular}
+
+  \vfill
+  {\small \today}
+\end{titlepage}
+
+% ─────────────────── TỔNG QUAN BAREM ────────────────────────────────────────
+\section*{Tổng quan Barem Điểm}
+
+\begin{longtable}{@{}p{7.5cm}cc@{}}
+  \toprule
+  \textbf{Nội dung} & \textbf{Điểm} & \textbf{Mức} \\
+  \midrule
+  \endfirsthead
+  \toprule
+  \textbf{Nội dung} & \textbf{Điểm} & \textbf{Mức} \\
+  \midrule
+  \endhead
+  Thiết kế lớp và cây kế thừa & 0.5 & \mandatory \\
+  Áp dụng OOP (Encapsulation, Inheritance, Polymorphism, Abstraction) & 1.0 & \mandatory \\
+  Design Patterns phù hợp & 1.0 & \mandatory \\
+  Quản lý người dùng, sản phẩm & 1.0 & \mandatory \\
+  Chức năng đấu giá & 1.0 & \mandatory \\
+  Xử lý lỗi \& ngoại lệ & 1.0 & \mandatory \\
+  Xử lý đấu giá đồng thời (concurrency) & 1.0 & \mandatory \\
+  Realtime update (Observer/Socket) & 0.5 & \mandatory \\
+  Kiến trúc Client–Server & 0.5 & \mandatory \\
+  MVC (JavaFX + FXML, Controller–Model–DAO) & 0.5 & \mandatory \\
+  Maven/Gradle, coding convention & 0.5 & \mandatory \\
+  Unit Test (JUnit) & 0.5 & \mandatory \\
+  CI/CD (GitHub Actions) & 0.5 & \mandatory \\
+  \midrule
+  Auto-Bidding & 0.5 & \optional \\
+  Anti-sniping & 0.5 & \optional \\
+  Bid History Visualization & 0.5 & \optional \\
+  \midrule
+  \textbf{Tổng} & \textbf{10+1} & \\
+  \bottomrule
+\end{longtable}
+
+\newpage
+
+% ══════════════════════════════════════════════════════════════════════════════
+%  PHẦN BẮT BUỘC
+% ══════════════════════════════════════════════════════════════════════════════
+
+\section{\score{0.5} Thiết kế lớp và cây kế thừa \hfill \mandatory}
+
+\subsection*{Chức năng đạt được}
+Hệ thống xây dựng hai cây kế thừa song song phục vụ toàn bộ miền nghiệp vụ đấu giá:
+
+\begin{itemize}[leftmargin=1.5em]
+  \item \textbf{Cây User:} \texttt{Entity} (abstract) $\to$ \texttt{User} (abstract) $\to$ \texttt{Bidder}, \texttt{Seller}, \texttt{Admin}.
+  \item \textbf{Cây Item:} \texttt{Entity} (abstract) $\to$ \texttt{Item} (abstract) $\to$ \texttt{Electronics}, \texttt{Art}, \texttt{Vehicle}.
+  \item \textbf{Thực thể độc lập:} \texttt{Auction}, \texttt{BidTransaction}, \texttt{AutoBidConfig} — tất cả đều kế thừa \texttt{Entity}.
+\end{itemize}
+
+\texttt{Entity} là lớp gốc định nghĩa \texttt{id: UUID}, \texttt{createdAt}, \texttt{updatedAt} cùng phương thức \texttt{touch()} dùng chung cho toàn hệ thống.
+
+\subsection*{Hướng giải quyết}
+Tách lớp cơ sở \texttt{Entity} chứa metadata vòng đời (id, timestamp) ra khỏi logic nghiệp vụ. Lớp \texttt{User} trừu tượng thêm tầng trung gian chứa trường dùng chung (\texttt{balance}, \texttt{role}, thông tin liên hệ), sau đó các lớp con (\texttt{Bidder}, \texttt{Seller}, \texttt{Admin}) chỉ thêm những đặc thù riêng.
+
+\subsection*{Lý do lựa chọn}
+Cây kế thừa hai tầng giúp loại bỏ trùng lặp (id, timestamp xuất hiện một lần duy nhất trong \texttt{Entity}), đồng thời giữ mỗi lớp con đủ mỏng để dễ hiểu và bảo trì. Thiết kế phản ánh trực tiếp mô hình nghiệp vụ nên không cần sơ đồ bổ sung để đọc hiểu code.
+
+% ──────────────────────────────────────────────────────────────────────────────
+\section{\score{1.0} Áp dụng OOP \hfill \mandatory}
+
+\subsection*{Chức năng đạt được}
+
+\textbf{Encapsulation.}
+Mọi trường đều là \texttt{private}; truy cập qua getter/setter có kiểm tra. Ví dụ: \texttt{User.setBalance(BigDecimal, LocalDateTime)} chỉ cập nhật số dư khi timestamp mới hơn trạng thái hiện tại — ngăn cập nhật lỗi thời từ các luồng song song. Các DTO (\texttt{LoginRequest}, \texttt{PlaceBidRequest}…) là \textit{immutable records}, không cho phép thay đổi sau khi tạo.
+
+\textbf{Inheritance.}
+\texttt{Bidder}, \texttt{Seller}, \texttt{Admin} kế thừa đầy đủ hành vi từ \texttt{User}; \texttt{Electronics}, \texttt{Art}, \texttt{Vehicle} kế thừa từ \texttt{Item}. Không có code trùng lặp giữa các lớp cùng cấp.
+
+\textbf{Polymorphism.}
+\texttt{Item} khai báo hai phương thức trừu tượng \texttt{getType()} và \texttt{printInfo()} được override tại mỗi lớp con. \texttt{ItemFactory.create(ItemType)} dùng biểu thức \texttt{switch} để trả về đúng kiểu con mà không cần ép kiểu (no cast) tại nơi sử dụng.
+
+\textbf{Abstraction.}
+Lớp \texttt{Entity}, \texttt{User}, \texttt{Item} đều là \texttt{abstract}. Enum \texttt{AuctionStatus}, \texttt{ItemType}, \texttt{Role}, \texttt{BidSource}, \texttt{MessageType} thay thế hằng số nguyên thô, tạo API type-safe và tự tài liệu.
+
+\subsection*{Hướng giải quyết}
+Thiết kế tuân theo nguyên tắc ``ưu tiên trừu tượng hoá cái gì, không phải làm gì'': \texttt{Item} chỉ mô tả \textit{cái gì là một mặt hàng đấu giá}, còn logic xử lý nằm ở tầng Service.
+
+\subsection*{Lý do lựa chọn}
+Áp dụng OOP đầy đủ giảm bề mặt lỗi: Encapsulation ngăn cập nhật trạng thái ngoài luồng kiểm soát; Polymorphism cho phép thêm loại mặt hàng mới mà không sửa code cũ (\textit{Open/Closed Principle}); Enum loại bỏ lỗi typo và magic number.
+
+% ──────────────────────────────────────────────────────────────────────────────
+\section{\score{1.0} Design Patterns phù hợp \hfill \mandatory}
+
+\subsection*{Chức năng đạt được}
+
+\begin{description}[leftmargin=2em, style=nextline]
+  \item[\textbf{Factory Pattern}]
+    \filepath{src/main/shared/factory/ItemFactory.java} — tạo đúng lớp con \texttt{Item} dựa vào \texttt{ItemType}. Nơi gọi không cần biết tên lớp cụ thể.
+
+  \item[\textbf{DAO (Data Access Object)}]
+    \filepath{server/dao/UserDao.java} và \filepath{AuctionDao.java} đóng gói toàn bộ SQL. Phần còn lại của ứng dụng không viết một câu SQL nào.
+
+  \item[\textbf{Service Layer}]
+    \filepath{AuthService}, \filepath{AuctionService}, \filepath{AuctionRulesEngine} — tách biệt rõ: DAO phụ trách persistence, Service phụ trách nghiệp vụ, Controller phụ trách giao tiếp mạng.
+
+  \item[\textbf{Singleton}]
+    \filepath{DatabaseManager} quản lý một kết nối H2 duy nhất trong suốt vòng đời server, tránh mở nhiều kết nối lãng phí.
+
+  \item[\textbf{Observer / Listener}]
+    \filepath{AuctionClientConnection} cung cấp \texttt{addAuctionListener(Consumer<AuctionEventDto>)}. Dashboard đăng ký listener; khi có sự kiện đấu giá, server broadcast và client cập nhật UI tự động.
+
+  \item[\textbf{Strategy (implicit)}]
+    \filepath{AuctionRulesEngine} có hai nhánh xử lý độc lập: \texttt{placeManualBid()} và \texttt{resolveAutoBidCompetition()}, dễ dàng mở rộng thêm chiến lược đấu giá khác.
+\end{description}
+
+\subsection*{Hướng giải quyết}
+Mỗi pattern giải quyết một vấn đề cụ thể, không áp dụng đại trà. Factory tập trung điểm khởi tạo; DAO tách mối quan tâm (concern separation); Observer tách nghiệp vụ server khỏi việc cập nhật UI client.
+
+\subsection*{Lý do lựa chọn}
+Các pattern được chọn đều là chuẩn công nghiệp cho ứng dụng Java desktop/server. Đặc biệt Observer là pattern tự nhiên nhất cho hệ thống realtime vì cho phép nhiều thành phần UI phản ứng cùng một sự kiện mà không tạo coupling trực tiếp.
+
+% ──────────────────────────────────────────────────────────────────────────────
+\section{\score{1.0} Quản lý người dùng, sản phẩm \hfill \mandatory}
+
+\subsection*{Chức năng đạt được}
+
+\textbf{Người dùng:}
+\begin{itemize}[leftmargin=1.5em]
+  \item Đăng ký tài khoản với vai trò \texttt{BIDDER} hoặc \texttt{SELLER}; mật khẩu lưu dạng SHA-256 hash.
+  \item Đăng nhập bằng tên đăng nhập + mật khẩu; server trả về thông tin người dùng đầy đủ.
+  \item Cập nhật thông tin cá nhân: tên hiển thị, email, số điện thoại, địa chỉ, số dư ví.
+  \item Admin xem danh sách toàn bộ người dùng.
+\end{itemize}
+
+\textbf{Sản phẩm / Phiên đấu giá:}
+\begin{itemize}[leftmargin=1.5em]
+  \item Seller tạo phiên đấu giá với 3 loại mặt hàng: \texttt{Electronics}, \texttt{Art}, \texttt{Vehicle} — mỗi loại có trường đặc thù riêng.
+  \item Chỉnh sửa thông tin phiên trước khi có lượt bid đầu tiên; xoá phiên nếu chưa có bid nào.
+  \item Danh sách phiên theo vai trò: Buyer thấy tất cả phiên đang mở; Seller thấy phiên của mình.
+\end{itemize}
+
+\subsection*{Hướng giải quyết}
+\filepath{AuthService} xử lý toàn bộ vòng đời người dùng; \filepath{AuctionService.saveAuction()} dùng UPSERT (insert nếu mới, update nếu đã tồn tại) để gộp thao tác tạo và chỉnh sửa vào một endpoint duy nhất.
+
+\subsection*{Lý do lựa chọn}
+UPSERT đơn giản hoá client API (không cần phân biệt POST/PUT) và an toàn khi retry do tính idempotent. Role-based access được kiểm tra tại tầng Service, không chỉ ở UI, nên không thể bị bỏ qua dù client bị thay đổi.
+
+% ──────────────────────────────────────────────────────────────────────────────
+\section{\score{1.0} Chức năng đấu giá \hfill \mandatory}
+
+\subsection*{Chức năng đạt được}
+
+\textbf{Vòng đời phiên đấu giá:}
+\[
+\texttt{OPEN} \xrightarrow{\text{startTime}} \texttt{RUNNING} \xrightarrow{\text{endTime}} \texttt{FINISHED} \xrightarrow{\text{thanh toán}} \texttt{PAID}
+\]
+Nhánh huỷ: bất kỳ trạng thái nào trước \texttt{PAID} đều có thể chuyển sang \texttt{CANCELED}.
+
+\textbf{Đặt giá thủ công:} Kiểm tra: người đặt không phải seller, phiên đang \texttt{RUNNING}, giá mới $>$ giá hiện tại, thoả mãn \texttt{minRaise}. Nếu hợp lệ, trừ ví người trước, cộng lại ví người đặt cũ.
+
+\textbf{Quản lý ví:}
+\begin{itemize}[leftmargin=1.5em]
+  \item Khi trở thành người đang dẫn đầu, số tiền bid bị giữ lại (\textit{wallet hold}).
+  \item Khi phiên kết thúc, số tiền hold của người thắng chuyển sang ví seller.
+  \item Huỷ phiên sẽ hoàn lại số tiền hold cho người dẫn đầu.
+\end{itemize}
+
+\textbf{Lịch sử bid:} Mỗi lượt đặt giá tạo một \texttt{BidTransaction} với thời gian, số tiền, nguồn (MANUAL/AUTO).
+
+\subsection*{Hướng giải quyết}
+\filepath{AuctionLifecycleScheduler} chạy mỗi giây bằng \texttt{ScheduledExecutorService}, kiểm tra startTime/endTime và chuyển trạng thái tự động. \filepath{AuctionRulesEngine} đóng gói tất cả quy tắc nghiệp vụ của một lượt đặt giá.
+
+\subsection*{Lý do lựa chọn}
+Tách scheduler khỏi service giúp test logic nghiệp vụ độc lập với đồng hồ hệ thống. Wallet hold theo mô hình \textit{escrow} là chuẩn ngành đấu giá trực tuyến: ngăn người dùng đặt giá vượt số dư thực tế.
+
+% ──────────────────────────────────────────────────────────────────────────────
+\section{\score{1.0} Xử lý lỗi \& ngoại lệ \hfill \mandatory}
+
+\subsection*{Chức năng đạt được}
+
+\begin{description}[leftmargin=2em, style=nextline]
+  \item[\textbf{Validation đầu vào}]
+    \texttt{IllegalArgumentException} với thông báo tiếng Việt khi: giá bid thấp hơn giá hiện tại, thiếu minRaise, số dư không đủ, tên đăng nhập đã tồn tại, cấu hình auto-bid không hợp lệ.
+
+  \item[\textbf{Kiểm tra trạng thái}]
+    \texttt{IllegalStateException} khi thao tác không hợp lệ với trạng thái hiện tại: đặt bid vào phiên \texttt{OPEN}/\texttt{FINISHED}, đánh dấu PAID phiên chưa FINISHED, xoá phiên đã có bid.
+
+  \item[\textbf{Database error wrapping}]
+    \texttt{SQLException} từ DAO được bắt và ném lại dạng \texttt{IllegalStateException} với thông báo rõ ràng, tránh để stack trace SQL lộ ra client.
+
+  \item[\textbf{Transaction rollback}]
+    \filepath{AuctionDao.saveSnapshot()} dùng \texttt{setAutoCommit(false)} và rollback thủ công khi có SQLException, đảm bảo không lưu trạng thái nửa vời.
+
+  \item[\textbf{Network retry}]
+    \filepath{AuctionClientConnection.connectWithRetry()} thử lại 20 lần với backoff 250ms trước khi báo lỗi, chịu được server khởi động chậm.
+
+  \item[\textbf{UI error dialog}]
+    \filepath{AlertHelper} hiển thị \texttt{Alert.AlertType.ERROR} tại luồng JavaFX, trích xuất thông báo từ \texttt{CompletionException} một cách nhất quán.
+\end{description}
+
+\subsection*{Hướng giải quyết}
+Phân tầng xử lý: Service throw runtime exception $\to$ Controller bắt và đặt \texttt{success=false} trong \texttt{ApiMessage} $\to$ Client nhận và hiển thị dialog. Lỗi không bao giờ bị nuốt im lặng (\textit{silent failure}).
+
+\subsection*{Lý do lựa chọn}
+Runtime exception (unchecked) phù hợp cho lỗi do vi phạm quy tắc nghiệp vụ vì không ép caller phải khai báo \texttt{throws}, giảm boilerplate. Transaction rollback tại DAO là tuyến phòng thủ cuối cùng bảo vệ tính nhất quán dữ liệu.
+
+% ──────────────────────────────────────────────────────────────────────────────
+\section{\score{1.0} Xử lý đấu giá đồng thời (Concurrency) \hfill \mandatory}
+
+\subsection*{Chức năng đạt được}
+
+\begin{itemize}[leftmargin=1.5em]
+  \item \textbf{ReentrantLock per auction:} Mỗi \texttt{UUID} phiên đấu giá có một khoá riêng lưu trong \texttt{ConcurrentHashMap<UUID, Lock>}. Các thao tác \texttt{placeBid}, \texttt{configureAutoBid}, \texttt{updateStatus}, \texttt{processLifecycleTick} đều \texttt{lock()} trước khi vào vùng tới hạn và \texttt{unlock()} trong \texttt{finally}.
+  \item \textbf{Thread pool cho kết nối:} \filepath{AuctionSocketServer} dùng \texttt{newCachedThreadPool()} — mỗi \texttt{ClientSession} chạy trên một luồng riêng, xử lý yêu cầu của nhiều client đồng thời.
+  \item \textbf{Scheduler đơn luồng:} \texttt{ScheduledExecutorService.newSingleThreadScheduledExecutor()} cho lifecycle tick, tránh race condition khi chuyển trạng thái phiên.
+  \item \textbf{Thread-safe collections:} \texttt{ConcurrentHashMap} cho session registry và auction cache; \texttt{CopyOnWriteArrayList} cho danh sách listener của client.
+  \item \textbf{Volatile fields:} \texttt{ClientSession.running} và \texttt{authenticatedUser} được khai báo \texttt{volatile}, đảm bảo visibility giữa các luồng.
+\end{itemize}
+
+\subsection*{Hướng giải quyết}
+Granular locking (khoá từng phiên thay vì khoá toàn cục) cho phép các phiên đấu giá khác nhau chạy song song hoàn toàn. Chỉ khi hai yêu cầu cùng tác động đến một phiên thì mới có contention.
+
+\subsection*{Lý do lựa chọn}
+Global lock sẽ tạo bottleneck khi hệ thống có nhiều phiên đấu giá đồng thời. ReentrantLock per auction là giải pháp cân bằng tốt giữa đơn giản và hiệu năng, phù hợp với quy mô của dự án.
+
+% ──────────────────────────────────────────────────────────────────────────────
+\section{\score{0.5} Realtime Update (Observer/Socket) \hfill \mandatory}
+
+\subsection*{Chức năng đạt được}
+
+\begin{itemize}[leftmargin=1.5em]
+  \item Server TCP lắng nghe tại cổng 5555; mỗi client kết nối được cấp một \texttt{ClientSession} chạy trên luồng riêng.
+  \item Giao thức JSON qua socket thuần: \texttt{ApiMessage\{category, type, requestId, success, payload\}}. Ba loại tin nhắn: REQUEST (client $\to$ server), RESPONSE (server $\to$ client, khớp requestId), EVENT (server $\to$ tất cả client, không yêu cầu trước).
+  \item Khi có bid mới, thay đổi trạng thái hoặc anti-sniping extension, server gọi \texttt{broadcastAuctionChange()} $\to$ gửi \texttt{AuctionEventDto} tới tất cả session đang kết nối.
+  \item Client dùng \texttt{addAuctionListener(Consumer<AuctionEventDto>)} để đăng ký nhận event; dashboard gọi \texttt{Platform.runLater()} để cập nhật UI an toàn từ luồng nền.
+  \item Khám phá server qua UDP broadcast (cổng 5556): client gửi PING, server phản hồi PONG kèm địa chỉ IP — tự động kết nối đúng server trong mạng LAN.
+\end{itemize}
+
+\subsection*{Hướng giải quyết}
+Tách biệt REQUEST/RESPONSE (có requestId, đồng bộ qua \texttt{CompletableFuture}) với EVENT (không có requestId, bất đồng bộ qua listener) giúp client xử lý hai luồng dữ liệu độc lập mà không nhầm lẫn.
+
+\subsection*{Lý do lựa chọn}
+TCP socket thuần + JSON tự triển khai phù hợp với quy mô học thuật: không phụ thuộc framework bên ngoài (như WebSocket/Netty), dễ debug bằng \texttt{telnet}, và minh hoạ rõ cơ chế networking ở mức thấp.
+
+% ──────────────────────────────────────────────────────────────────────────────
+\section{\score{0.5} Kiến trúc Client–Server \hfill \mandatory}
+
+\subsection*{Chức năng đạt được}
+
+\textbf{Server stack} (\filepath{src/main/server/}):
+\begin{itemize}[leftmargin=1.5em]
+  \item \texttt{AuctionEmbeddedServer}: khởi tạo database, service layer, socket server, scheduler.
+  \item \texttt{ServerRequestController}: định tuyến \texttt{MessageType} tới đúng service.
+  \item \texttt{SessionRegistry}: quản lý tập hợp \texttt{ClientSession} đang sống.
+\end{itemize}
+
+\textbf{Client stack} (\filepath{src/main/client/}):
+\begin{itemize}[leftmargin=1.5em]
+  \item \texttt{AuctionClientConnection}: kết nối socket, luồng đọc nền, ánh xạ requestId $\to$ \texttt{CompletableFuture}.
+  \item \texttt{ClientSessionService}: API cấp cao (login, listAuctions, placeBid…) trả về \texttt{CompletableFuture}.
+  \item \texttt{AppContext}: quản lý JavaFX Stage và chuyển Scene.
+\end{itemize}
+
+\textbf{Launcher:} \filepath{src/main/AuctionLauncher.java} tự động phát hiện server qua UDP; nếu không có, khởi động \texttt{AuctionEmbeddedServer} ngay trong tiến trình hiện tại — cho phép chạy standalone một file JAR duy nhất.
+
+\subsection*{Hướng giải quyết}
+Server và client được đặt trong hai package riêng biệt (\texttt{server}, \texttt{client}); chỉ package \texttt{shared} là dùng chung — DTO, model, enum, giao thức.
+
+\subsection*{Lý do lựa chọn}
+Tách package cứng ngăn client vô tình truy cập DAO hay service trực tiếp (bỏ qua mạng). Embedded server mode giúp demo dễ dàng: một lệnh \texttt{mvn javafx:run} là chạy được, không cần cài đặt database hay server riêng.
+
+% ──────────────────────────────────────────────────────────────────────────────
+\section{\score{0.5} MVC (JavaFX + FXML, Controller–Model–DAO) \hfill \mandatory}
+
+\subsection*{Chức năng đạt được}
+
+\begin{description}[leftmargin=2em, style=nextline]
+  \item[\textbf{Model}]
+    \filepath{src/main/shared/model/} — các lớp domain (\texttt{User}, \texttt{Auction}, \texttt{Item}…) và DTO không phụ thuộc vào UI hay framework.
+
+  \item[\textbf{View}]
+    \filepath{src/main/resources/fxml/} — ba màn hình khai báo bằng FXML:
+    \texttt{login-view.fxml} (đăng nhập/đăng ký), \texttt{dashboard-view.fxml} (màn hình chính), \texttt{user-info-view.fxml} (hồ sơ người dùng). Style tách riêng trong \texttt{app.css}.
+
+  \item[\textbf{Controller}]
+    \filepath{src/main/client/controller/} — \texttt{LoginController}, \texttt{DashboardController}, \texttt{UserInfoController} xử lý sự kiện UI, gọi \texttt{ClientSessionService}, cập nhật View qua \texttt{Platform.runLater()}.
+
+  \item[\textbf{DAO}]
+    \filepath{src/main/server/dao/} — \texttt{UserDao}, \texttt{AuctionDao} đóng gói SQL, chỉ nhận/trả entity; được gọi bởi Service, không bao giờ trực tiếp từ Controller.
+\end{description}
+
+\subsection*{Hướng giải quyết}
+Luồng dữ liệu một chiều: Controller nhận sự kiện $\to$ gọi Service $\to$ Service gọi DAO $\to$ dữ liệu trả về DTO $\to$ Controller cập nhật View.
+
+\subsection*{Lý do lựa chọn}
+FXML khai báo UI tách biệt hoàn toàn layout khỏi logic Java, cho phép thay đổi giao diện mà không chỉnh Java Controller. DAO tách SQL ra khỏi nghiệp vụ, dễ thay thế H2 bằng database khác.
+
+% ──────────────────────────────────────────────────────────────────────────────
+\section{\score{0.5} Maven, Coding Convention \hfill \mandatory}
+
+\subsection*{Chức năng đạt được}
+
+\begin{itemize}[leftmargin=1.5em]
+  \item \textbf{Build tool:} Maven 3 với \texttt{pom.xml} chuẩn; Java 21; dependency management rõ ràng.
+  \item \textbf{Plugins:}
+    \texttt{build-helper-maven-plugin} khai báo \texttt{src/} là source root bổ sung;
+    \texttt{maven-compiler-plugin} với \texttt{--enable-preview} cho Java 21;
+    \texttt{javafx-maven-plugin} cho lệnh \texttt{mvn javafx:run};
+    \texttt{maven-surefire-plugin} chạy JUnit 5.
+  \item \textbf{Dependencies:} JavaFX 21.0.6, Jackson 2.17.2, H2 2.3.232, JUnit Jupiter 5.11.4.
+  \item \textbf{Coding convention:} Đặt tên theo camelCase/PascalCase chuẩn Java; package name chữ thường; tên lớp phản ánh vai trò (\texttt{*Dao}, \texttt{*Service}, \texttt{*Controller}, \texttt{*Dto}).
+\end{itemize}
+
+\subsection*{Hướng giải quyết}
+Dùng Maven thay vì Gradle để tận dụng XML khai báo tường minh, dễ đọc cho người mới; không viết build script phức tạp.
+
+\subsection*{Lý do lựa chọn}
+Maven là tiêu chuẩn phổ biến cho dự án JavaFX, có tích hợp tốt với GitHub Actions (\texttt{cache: maven}), giảm thời gian build lần sau.
+
+% ──────────────────────────────────────────────────────────────────────────────
+\section{\score{0.5} Unit Test (JUnit) \hfill \mandatory}
+
+\subsection*{Chức năng đạt được}
+
+\begin{itemize}[leftmargin=1.5em]
+  \item Framework JUnit Jupiter 5.11.4 đã được cấu hình đầy đủ trong \texttt{pom.xml}.
+  \item \texttt{maven-surefire-plugin} cấu hình để chạy \texttt{mvn test} trong CI/CD pipeline.
+  \item Pipeline GitHub Actions thực thi \texttt{mvn test} và thu thập kết quả từ \texttt{target/surefire-reports/}.
+  \item Các lớp validation trong \filepath{AuctionRulesEngine} (kiểm tra minRaise, số dư, trạng thái phiên) có thể được test dễ dàng vì không phụ thuộc vào database hay mạng.
+\end{itemize}
+
+\subsection*{Hướng giải quyết}
+Hạ tầng test được thiết lập sẵn để đội phát triển có thể thêm test class bất kỳ lúc nào mà không cần cấu hình thêm. Cấu trúc Service/DAO tách biệt tạo điều kiện thuận lợi cho unit test từng tầng độc lập.
+
+\subsection*{Lý do lựa chọn}
+JUnit 5 là framework test chuẩn cho Java hiện đại; tích hợp tốt với Maven Surefire và GitHub Actions test reporter. Kiến trúc phân tầng (không mix SQL vào nghiệp vụ) là nền tảng để viết unit test thuần túy mà không cần cơ sở dữ liệu thật.
+
+% ──────────────────────────────────────────────────────────────────────────────
+\section{\score{0.5} CI/CD (GitHub Actions) \hfill \mandatory}
+
+\subsection*{Chức năng đạt được}
+
+\textbf{Workflow \texttt{build.yml}} (trigger: push/PR vào nhánh \texttt{main}):
+\begin{enumerate}[leftmargin=2em]
+  \item Checkout code (\texttt{actions/checkout@v4}).
+  \item Thiết lập JDK 21 Temurin với Maven cache.
+  \item \texttt{mvn clean package -DskipTests} — xác nhận code biên dịch được.
+  \item \texttt{mvn test} — chạy toàn bộ test suite.
+  \item Thu thập báo cáo test từ \texttt{target/surefire-reports/} bằng \texttt{dorny/test-reporter@v1}.
+\end{enumerate}
+
+\textbf{Workflow \texttt{quality.yml}} (trigger: push/PR vào \texttt{main} hoặc \texttt{develop}):
+\begin{enumerate}[leftmargin=2em]
+  \item Checkout + JDK 21.
+  \item \texttt{mvn clean verify} — chạy build + test + verify lifecycle đầy đủ.
+\end{enumerate}
+
+\subsection*{Hướng giải quyết}
+Hai workflow tách biệt: một tập trung vào build+test nhanh, một chạy verify đầy đủ trên các nhánh quan trọng — tránh chặn developer với pipeline quá nặng.
+
+\subsection*{Lý do lựa chọn}
+GitHub Actions tích hợp sẵn với repository, không cần cài đặt CI server ngoài. Matrix build cho phép test nhiều phiên bản Java trong tương lai. Cache Maven giảm thời gian tải dependency từ ~2 phút xuống còn vài giây.
+
+% ══════════════════════════════════════════════════════════════════════════════
+%  PHẦN TUỲ CHỌN
+% ══════════════════════════════════════════════════════════════════════════════
+
+\section{\score{0.5} Auto-Bidding \hfill \optional}
+
+\subsection*{Chức năng đạt được}
+
+Người dùng có thể cài đặt đấu giá tự động bằng cách cung cấp:
+\begin{itemize}[leftmargin=1.5em]
+  \item \textbf{maxBid}: Mức giá tối đa sẵn sàng trả.
+  \item \textbf{increment}: Bước tăng giá mỗi lần hệ thống tự đặt.
+\end{itemize}
+
+Khi có người khác đặt giá cao hơn, hệ thống tự động đặt giá cho người đăng ký auto-bid (nguồn \texttt{BidSource.AUTO}) qua proxy bidder \texttt{SYSTEM}, cho đến khi đạt \texttt{maxBid}. Thuật toán \texttt{resolveAutoBidCompetition()} chạy vòng lặp đến khi trạng thái ổn định (không có thay đổi nào thêm).
+
+\subsection*{Hướng giải quyết}
+\filepath{AuctionRulesEngine.resolveAutoBidCompetition()} lọc các \texttt{AutoBidConfig} còn hoạt động, tính giá tiếp theo (\texttt{min(maxBid, currentPrice + increment)}), cập nhật người dẫn đầu và lặp lại cho đến khi không còn auto-bid nào có thể cạnh tranh thêm.
+
+\subsection*{Lý do lựa chọn}
+Mô hình proxy bidding là chuẩn của các sàn đấu giá lớn (eBay). Vòng lặp đến ổn định đảm bảo kết quả xác định (deterministic) khi nhiều auto-bid cùng hoạt động, không có race condition vì được bảo vệ bởi ReentrantLock của phiên.
+
+% ──────────────────────────────────────────────────────────────────────────────
+\section{\score{0.5} Anti-sniping \hfill \optional}
+
+\subsection*{Chức năng đạt được}
+
+\begin{itemize}[leftmargin=1.5em]
+  \item Nếu bid được đặt trong \textbf{15 giây cuối} trước giờ kết thúc, thời gian kết thúc được tự động gia hạn thêm \textbf{30 giây}.
+  \item Số lần gia hạn được ghi nhận trong trường \texttt{extensionCount} của \texttt{Auction}.
+  \item Không giới hạn số lần gia hạn — đảm bảo người ra giá sau cùng luôn có đủ thời gian phản ứng.
+  \item Thông tin gia hạn được broadcast tới tất cả client qua \texttt{AuctionEventDto}.
+\end{itemize}
+
+\subsection*{Hướng giải quyết}
+Phương thức \texttt{applyAntiSniping()} trong \filepath{AuctionRulesEngine} được gọi ngay sau khi lượt bid hợp lệ được chấp nhận. Hằng số \texttt{ANTI\_SNIPING\_TRIGGER = 15s} và \texttt{ANTI\_SNIPING\_EXTENSION = 30s} được định nghĩa tại một chỗ, dễ điều chỉnh.
+
+\subsection*{Lý do lựa chọn}
+Anti-sniping bảo vệ tính công bằng của đấu giá: ngăn kẻ ``bắn tỉa'' (sniper) đặt giá vào giây cuối khi người khác không còn kịp phản ứng. Gia hạn 30 giây thay vì kéo dài cố định đảm bảo phiên kết thúc khi không còn hoạt động.
+
+% ──────────────────────────────────────────────────────────────────────────────
+\section{\score{0.5} Bid History Visualization \hfill \optional}
+
+\subsection*{Chức năng đạt được}
+
+\begin{itemize}[leftmargin=1.5em]
+  \item \textbf{Biểu đồ giá:} \texttt{LineChart<String, Number>} trong \texttt{DashboardController} vẽ đường giá theo thời gian. Trục X là timestamp (định dạng \texttt{HH:mm:ss}), trục Y là giá. Điểm bắt đầu là giá khởi điểm, mỗi bid thêm một điểm mới.
+  \item \textbf{Bảng lịch sử:} \texttt{TableView} với các cột Bidder, Số tiền, Thời gian — sắp xếp theo thứ tự bid.
+  \item \textbf{Bảng auto-bid:} \texttt{TableView} hiển thị các cấu hình auto-bid đang hoạt động (Bidder, maxBid, increment).
+  \item \textbf{Cập nhật realtime:} Khi nhận \texttt{AuctionEventDto}, \texttt{Platform.runLater()} cập nhật cả biểu đồ và bảng mà không cần F5.
+\end{itemize}
+
+\subsection*{Hướng giải quyết}
+Server tính toán \texttt{List<PricePointDto>} trong \filepath{AuctionViewMapper.toDetail()} — bao gồm điểm giá khởi điểm và toàn bộ bid — rồi truyền qua network. Client chỉ cần render, không cần tính toán lại.
+
+\subsection*{Lý do lựa chọn}
+Tính toán tại server đảm bảo mọi client nhận cùng dữ liệu chính xác (single source of truth). JavaFX LineChart được chọn vì tích hợp sẵn trong platform, không cần thêm dependency chart library bên ngoài.
+
+% ──────────────────────────────────────────────────────────────────────────────
+\newpage
+\section*{Tổng kết}
+
+\begin{longtable}{@{}p{7cm}ccc@{}}
+  \toprule
+  \textbf{Tiêu chí} & \textbf{Điểm} & \textbf{Đạt} & \textbf{Ghi chú} \\
+  \midrule
+  \endfirsthead
+  \toprule
+  \textbf{Tiêu chí} & \textbf{Điểm} & \textbf{Đạt} & \textbf{Ghi chú} \\
+  \midrule
+  \endhead
+  Thiết kế lớp và cây kế thừa       & 0.5 & $\checkmark$ & Entity $\to$ User/Item hierarchy \\
+  OOP đầy đủ 4 tính chất             & 1.0 & $\checkmark$ & Private fields, abstract class, polymorphism \\
+  Design Patterns                    & 1.0 & $\checkmark$ & Factory, DAO, Service, Observer, Singleton \\
+  Quản lý người dùng, sản phẩm      & 1.0 & $\checkmark$ & CRUD + role-based access \\
+  Chức năng đấu giá                  & 1.0 & $\checkmark$ & Full lifecycle, wallet hold, bid validation \\
+  Xử lý lỗi \& ngoại lệ             & 1.0 & $\checkmark$ & Multilayer: validation, state, DB, network \\
+  Concurrency                        & 1.0 & $\checkmark$ & ReentrantLock per auction, thread pool \\
+  Realtime (Observer/Socket)         & 0.5 & $\checkmark$ & TCP + JSON protocol, broadcast event \\
+  Kiến trúc Client–Server            & 0.5 & $\checkmark$ & Tách package, embedded server, UDP discovery \\
+  MVC (JavaFX + FXML + DAO)          & 0.5 & $\checkmark$ & 3 FXML views, controller, DAO layer \\
+  Maven, coding convention           & 0.5 & $\checkmark$ & Maven 3, Java 21, chuẩn đặt tên Java \\
+  Unit Test (JUnit)                  & 0.5 & $\sim$       & Framework đã cấu hình, CI chạy mvn test \\
+  CI/CD (GitHub Actions)             & 0.5 & $\checkmark$ & build.yml + quality.yml \\
+  \midrule
+  \textbf{Auto-Bidding}              & 0.5 & $\checkmark$ & Proxy bidder, vòng lặp ổn định \\
+  \textbf{Anti-sniping}              & 0.5 & $\checkmark$ & 15s trigger, 30s extension \\
+  \textbf{Bid History Visualization} & 0.5 & $\checkmark$ & LineChart + TableView, realtime update \\
+  \midrule
+  \textbf{Tổng ước tính}             & \textbf{10+1} & & \\
+  \bottomrule
+\end{longtable}
+
+\vspace{1em}
+\noindent\textit{Ký hiệu: $\checkmark$ = đạt đầy đủ; $\sim$ = đạt một phần (infrastructure có, test case cần bổ sung).}
+
+\end{document}
